@@ -1,14 +1,14 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-
 ctx.canvas.width = 500;
 ctx.canvas.height = 500;
 
 var trueXVals = [];
 var trueYVals = [];
 
-var m = 0;
-var b = 0;
+
+var m = Math.random() * (10 + 10) -10;
+var b = Math.random() * (ctx.canvas.height * 2);
 var learningRate = 100;
 
 function graph(noise, direction, amount) {
@@ -49,17 +49,15 @@ function plot(xVals, yVals, color, size) {
   ctx.fillStyle = color;
   if (size == undefined) {
     for (var i = 0; i < xVals.length; i++) {
+      ctx.fillStyle = color
       ctx.fillRect(
         (xVals[i] * ctx.canvas.width) / xVals.length,
         (yVals[i] * ctx.canvas.height) / yVals.length,
         ctx.canvas.width / xVals.length,
         ctx.canvas.height / xVals.length
       );
-    }
 
-    ctx.fillStyle = "blue";
-
-    for (var i = 0; i < xVals.length; i++) {
+      ctx.fillStyle = "blue";
       ctx.fillRect(
         (xVals[i] * ctx.canvas.width) / xVals.length,
         (predict(m, xVals[i], b) * ctx.canvas.height) / yVals.length,
@@ -67,14 +65,27 @@ function plot(xVals, yVals, color, size) {
         ctx.canvas.height / xVals.length
       );
     }
+
+    
+
   } else {
     for (var i = 0; i < xVals.length; i++) {
+      ctx.fillStyle = color
       ctx.fillRect(
         (xVals[i] * ctx.canvas.width) / xVals.length,
         (yVals[i] * ctx.canvas.height) / yVals.length,
         size,
         size
       );
+
+      ctx.fillStyle = "blue"
+      ctx.fillRect(
+        (xVals[i] * ctx.canvas.width) / xVals.length,
+        (predict(m, xVals[i], b) * ctx.canvas.height) / yVals.length,
+        ctx.canvas.width / xVals.length,
+        ctx.canvas.height / xVals.length
+      );
+
     }
   }
 }
@@ -91,8 +102,8 @@ function loss(m, b) {
   return sum / trueXVals.length;
 }
 
-function train() {
-
+function train(method) { 
+  if(method == "batch"){
   var divide = true;
   
   //Gradient descent algorithm
@@ -117,33 +128,35 @@ function train() {
   } 
   
   if(divide == true){
+    //Divide the learning rate by two if the algorithm isn't learning anymore
     learningRate = learningRate/2;
   }
+  
+} else if(method == "stochastic"){
 
   var arrayM = [];
   var arrayB = [];
-  
- 
-/** 
+
+
   //Stochastic gradient descent
-  for (var i = 0; i < 100000; i++) {
-    arrayM[i] = Math.floor(Math.random() * (10 + 10)) + -10;
-    arrayB[i] = Math.random() * ctx.canvas.height;
+    var guessM = Math.random() * (10 + 10) -10;
+    var guessB = Math.random() * (ctx.canvas.height * 2);
+
+
+    if (loss(guessM, guessB) < loss(m, b)) {
+      m = guessM;
+      b = guessB;
   }
 
-  for (var i = 0; i < arrayM.length; i++) {
-    if (loss(arrayM[i], arrayB[i]) < loss(m, b)) {
-      m = arrayM[i];
-      b = arrayB[i];
-    }
-  }
-**/
 }
-graph(5,"positive", 50);
+
+}
+graph(50,"positive", 500);
 
 setInterval(function() {
   ctx.fillStyle = "black";
-  train();
+  //Training method, whether stochastic or batch. Adding mini-batch should be easy but I don't want to right now
+  train("batch");
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   ctx.fillStyle = "white";
