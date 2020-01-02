@@ -13,20 +13,20 @@ var players = [];
 
 
 function Player(player) {
-	this.x = player.x;
-	this.y = player.y
+    this.x = player.x;
+    this.y = player.y
 
-	this.width = player.width;
-	this.height = player.height;
+    this.width = player.width;
+    this.height = player.height;
 
-	this.speed = player.speed;
+    this.speed = player.speed;
 
-	this.score = 0;
+    this.score = 0;
 
 }
 
 function sigmoid(t) {
-    return 1/(1+Math.pow(Math.E, -t));
+    return 1 / (1 + Math.pow(Math.E, -t));
 }
 
 
@@ -34,26 +34,26 @@ function sigmoid(t) {
 //Ball object-prototype
 //Again, might have powerups or something if I get the basic game done early, might as well make it easy to have multiple balls
 function Ball(ball) {
-	this.x = ball.x;
-	this.y = ball.y;
+    this.x = ball.x;
+    this.y = ball.y;
 
-	this.width = ball.width;
-	this.height = ball.height;
+    this.width = ball.width;
+    this.height = ball.height;
 
-	this.direction = null;
-	this.speed = ball.speed;
-	this.angle = 0;
-	this.velX = 0;
-	this.velY = 0;
+    this.direction = null;
+    this.speed = ball.speed;
+    this.angle = 0;
+    this.velX = 0;
+    this.velY = 0;
 
 }
 
 var ball = new Ball({
-	x: ctx.canvas.width / 2 - 5,
-	y: ctx.canvas.height / 2 - 5,
-	width: 10,
-	height: 10,
-	speed: 4
+    x: ctx.canvas.width / 2 - 5,
+    y: ctx.canvas.height / 2 - 5,
+    width: 10,
+    height: 10,
+    speed: 4
 
 });
 
@@ -64,68 +64,78 @@ ball.velX = 5;
 ball.velY = 5;
 
 if (Math.random() > 0.5) {
-	ball.direction = "left";
+    ball.direction = "left";
 } else {
-	ball.direction = "right";
+    ball.direction = "right";
 }
 
-function init(numOfNNs){
-	var left = true;
+function init(numOfNNs) {
+    var left = true;
 
-  for(var i = 0; i <= numOfNNs-1; i++){
-    if(left == true){
-    	left = false;
-          players.push( {
-            x: 0,
-            y: ctx.canvas.height / 2 - 50,
-            speed: 8
-        } );
-      } else {
-      	left = true;
-          players.push( {
-            x: ctx.canvas.width - 20,
-            y: ctx.canvas.height / 2 - 50,
-            speed: 8
-        } );
-      }
-    
-  
-	neuralNetworks.push(
-      {
-      	//13 inputs
-      	inputs: [],
-        weights1: [(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1],
-        biases: [(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1], 
-        weights2: [(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1,(Math.random() * 2) - 1],
-        outputs: []
-      }
-    );
-    
+    for (var i = 0; i <= numOfNNs - 1; i++) {
+        if (left == true) {
+            left = false;
+            players.push({
+                x: 0,
+                y: ctx.canvas.height / 2 - 50,
+                speed: 8
+            });
+        } else {
+            left = true;
+            players.push({
+                x: ctx.canvas.width - 20,
+                y: ctx.canvas.height / 2 - 50,
+                speed: 8
+            });
+        }
 
-    
-  }
+
+        neuralNetworks.push({
+            //13 inputs
+            inputs: [],
+            weights1: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1],
+            biases: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1],
+            weights2: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1],
+            outputs: []
+        });
+
+
+
+    }
 }
 
 init(2)
 
-function updateNN(index){
-	
-}
 
-
-
-function frame(){
-	ctx.fillStyle = "black";
+function frame() {
+    ctx.fillStyle = "black";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-   ctx.fillStyle = "white"; 
-    for(var i = 0; i < players.length; i++){
-   
-		ctx.fillRect(players[i].x, players[i].y, 20, 100);
-	}	
 
-    
+    ctx.fillStyle = "white";
+    ctx.fillRect(ball.x, ball.y, ball.width, ball.height);
 
-	
+    for (var i = 0; i < players.length; i++) {
+        ctx.fillRect(players[i].x, players[i].y, 20, 100);
+    }
+
+    //Ball collision against top and bottom wall
+    if (ball.y <= 0 || ball.y + ball.height >= ctx.canvas.height) {
+        ball.velY = -ball.velY;
+
+    }
+
+    //Ball movement
+    if (ball.direction == "right") {
+        ball.x += ball.velX * Math.cos(ball.angle * Math.PI / 180);
+        ball.y += ball.velY * Math.sin(ball.angle * Math.PI / 180);
+    } else if (ball.direction == "left") {
+        ball.x -= ball.velX * Math.cos(ball.angle * Math.PI / 180);
+        ball.y -= ball.velY * Math.sin(ball.angle * Math.PI / 180);
+    }
+
+    requestAnimationFrame(frame);
+
+
 }
 
 frame();
