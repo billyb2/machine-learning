@@ -2,25 +2,43 @@
 //Stores all nn's
 var neuralNetworks = [];
 
+//Sigmoid function
+//https://www.justgivemeanexample.com/example/create-a-sigmoid-function-in-javascript
+function sigmoid(input) {
+	return 1 / (1 + Math.exp(-input));
+}
+
 function init(numOfnns) {
 	for (var i = 0; i < numOfnns; i++) {
 		neuralNetworks.push({
 			//2 inputs
-			inputs: [],
 			//4 weights
 			weights1: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1],
 			//2 biases
 			biases: [(Math.random() * 20) - 10, (Math.random() * 20) - 10],
 			//4 weights
-			weights2: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1],
+			weights2: [(Math.random() * 2) - 1, (Math.random() * 2) - 1]
 
 			//1 output
-			outputs: []
 		})
 	}
 }
 
-init(100)
-alert(neuralNetworks)
+function calcOutput(input1, input2, index){
+	//Calculates the input of the two hidden neurons
+    //While this could be done all at once, I find it's easier to understand this way.
+	var hn1 = sigmoid( (input1 * neuralNetworks[index].weights1[0]) + (input2 *  neuralNetworks[index].weights1[2]) + neuralNetworks[index].biases[0]);
+    
+    var hn2 = sigmoid( (input1 * neuralNetworks[index].weights1[1]) + (input2 *  neuralNetworks[index].weights1[3]) + neuralNetworks[index].biases[1]);
+    
+    var output = sigmoid( hn1 * neuralNetworks[index].weights2[0] + hn2 * neuralNetworks[index].weights2[1]);
+    
+    return output;
+    
+}
 
+//Initializes the amount of neural networks requested by the user with random weights and biases
+init(100)
+
+alert(calcOutput(1, 1, 0));
 </script>
