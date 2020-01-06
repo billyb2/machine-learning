@@ -1,6 +1,11 @@
 <script>
 //Stores all nn's
 var neuralNetworks = [];
+var outputs = [];
+var costs = [];
+
+var sumCost = 0;
+var meanCost;
 
 //Sigmoid function
 //https://www.justgivemeanexample.com/example/create-a-sigmoid-function-in-javascript
@@ -40,5 +45,65 @@ function calcOutput(input1, input2, index){
 //Initializes the amount of neural networks requested by the user with random weights and biases
 init(100)
 
-alert(calcOutput(1, 1, 0));
+//Calculate all the outputs for all the NN's and all possible inputs, and store it in the outputs array.
+for(var i = 0; i < neuralNetworks.length; i++){
+	outputs.push( [calcOutput(0, 0, i), calcOutput(0, 1, i), calcOutput(1, 1, i), calcOutput(1, 0, i)] );
+}
+
+//After that's done, calculate the cost using the mean squared error.
+//Again, this could be done in one step, and should be for efficiency's sake, but to make it easier to understand I'm seperating the steps
+for(var i = 0; i < outputs.length; i++){
+	//Calculates the difference between the predicted and actual answer for XOR of 1 and 1 and squares it
+    //Same for all of the others
+    
+	var xor00Difference = Math.pow(outputs[i][0] - 0, 2)
+    var xor01Difference = Math.pow(outputs[i][1] - 1, 2)
+    var xor11Difference = Math.pow(outputs[i][2] - 0, 2)
+    var xor10Difference = Math.pow(outputs[i][3] - 1, 2)
+    
+    //Outputs the mean of the differences to the costs array
+    costs.push( (xor00Difference + xor01Difference + xor11Difference + xor10Difference)/4 );
+    
+}
+
+//Now there are multiple ways that we could find out which algorithms did the best, but since I'm not smart enough to do it another way, we're going to find the mean of all of the algorithms' costs, and which ever ones are lower than the mean get to survive
+
+//First, we've gotta find the mean
+
+//Find the sum of all of the costs
+for(var i = 0; i < costs.length; i ++){
+	sumCost += costs[i];
+}
+
+//And divide it by the number of costs
+meanCost = (sumCost/costs.length)/2;
+
+//Now we check every individual agorithm's cost, and if the cost is higher than the average (which means it performed worse), it dies. 
+//Gruesome ik
+//Do this repeatedly, until the number of neural networks is below half of the original amount and there's an even number
+//Again, this is a really lazy approach to doing this, but it should work for the time being
+
+alert(costs.length);
+for (var i = 0; i < costs.length; i++){
+	//If the cost is greater than the average divided by two
+    //I do this since I found that whenever I do just the average, it removes around 25% of the nn's, when I want around 50
+	if( costs[i] > meanCost){
+    	//Delete all of that nn's data
+        outputs.splice(i, 1);
+        costs.splice(i, 1);
+        neuralNetworks.splice(i, 1);
+    }
+    
+    
+}
+
+//Interestingly, I've found there's always 50 nn's left whenever I use the mean cost divided by two. I believe that this might just be extreme luck, so if it is greater than 50, I'll just shave off the end
+//While I don't believe this can happen, I should prepare just in case
+
+alert(costs.length)
+
+
+
+
+
 </script>
