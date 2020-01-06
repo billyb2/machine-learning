@@ -84,16 +84,25 @@ meanCost = (sumCost/costs.length);
 //Do this repeatedly, until the number of neural networks is below half of the original amount and there's an even number
 //Again, this is a really lazy approach to doing this, but it should work for the time being
 
+alert(costs.length);
+var badIndexes = [];
+
+/**While this is a pretty complex and computationally expensive method, 
+it's a simple one to produce. If i just removed all of the bad indexes with array.splice(), it would always stop after removing 50.
+**/
 for(var i = 0; i < costs.length; i++){
+	
+    
 	if (costs[i] > meanCost){
-    	costs.splice(i, 1);
+    	badIndexes.push(i);
     }
 }
 
-alert(costs[0]);
-alert(meanCost);
+for(var i = 0; i < badIndexes.length; i ++){
+	costs.splice(badIndexes[i], 1);
+}
 
-alert(costs[0] > meanCost);
+//Now for the actual reproduction/mutation part
 
 
 </script>
