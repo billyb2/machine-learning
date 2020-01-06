@@ -1,1 +1,24 @@
+<script>
+//Stores all nn's
+var neuralNetworks = [];
 
+function init(numOfnns){
+	for (var i = 0; i < numOfnns; i++){
+    	neuralNetworks.push(
+        {
+        	//2 inputs
+        	inputs: [],
+            //4 weights
+            weights1: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1] 
+            //2 biases
+            weights1: [(Math.random() * 20) - 10, (Math.random() * 20) - 10] 
+            //4 weights
+            weights2: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1] 
+            
+            //1 output
+            outputs: []
+        }
+    }
+}
+
+</script>
