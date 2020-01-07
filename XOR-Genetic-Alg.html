@@ -3,11 +3,14 @@
 var neuralNetworks = [];
 var outputs = [];
 var costs = [];
+var test = [];
 
 var maxNumOfNNs = 0;
 
 var sumCost = 0;
 var meanCost;
+
+var maxMutation = 0.01
 
 //Sigmoid function
 //https://www.justgivemeanexample.com/example/create-a-sigmoid-function-in-javascript
@@ -109,16 +112,20 @@ for(var i = 0; i < badIndexes.length; i ++){
 
 
 
-//Now for the actual reproduction/mutation part
-
 //First, we make sure that nobody the number of nn's has gotten lower
 if (maxNumOfNNs - neuralNetworks.length > 0){
 	for (var i = 0; i < (maxNumOfNNs - neuralNetworks.length); i ++){
-    	neuralNetworks.push({
-			weights1:
+    	var nn1 = neuralNetworks[ Math.floor(Math.random() * neuralNetworks.length) ];
+        var nn2 = neuralNetworks[ Math.floor(Math.random() * neuralNetworks.length) ];
+    	test.push({
+        weights1: [ (Math.random()) > 0.5 ? nn1.weights1[0] * Math.random() * maxMutation : nn2.weights1[0],  (Math.random()) > 0.5 ? nn1.weights1[1] : nn2.weights1[1],  (Math.random()) > 0.5 ? nn1.weights1[2] : nn2.weights1[2],  (Math.random()) > 0.5 ? nn1.weights1[3] : nn2.weights1[3] ],
+        biases: [ (Math.random()) > 0.5 ? nn1.biases[0] : nn2.biases[0] ]
 		});
     }
+                 
 }
-	
+
+alert(test[0].weights1);
+                 
 
 </script>
