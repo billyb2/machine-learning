@@ -10,12 +10,19 @@ var maxNumOfNNs = 0;
 var sumCost = 0;
 var meanCost;
 
-var maxMutation = 0.001;
+var maxMutation = 0.0001;
+var squishingFunction = "tanh";
+var maxRandomForWeights = 1;
+var maxRandomForBiases = 1;
 
 //Sigmoid function
 //https://www.justgivemeanexample.com/example/create-a-sigmoid-function-in-javascript
-function sigmoid(input) {
-	return 1 / (1 + Math.exp(-input));
+function squish(input, method) {
+	if(method == "sigmoid"){
+		return 1 / (1 + Math.exp(-input));
+    } else if (method == "tanh"){
+    	return Math.tanh(input)
+    }
 }
 
 function init(numOfnns) {
@@ -24,13 +31,13 @@ function init(numOfnns) {
 		neuralNetworks.push({
 			//2 inputs
 			//4 weights
-			weights1: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1],
+			weights1: [ (Math.random() * (maxRandomForWeights * 2) ) - maxRandomForWeights, (Math.random() * (maxRandomForWeights * 2) ) - maxRandomForWeights, (Math.random() * (maxRandomForWeights * 2) ) - maxRandomForWeights, (Math.random() * (maxRandomForWeights * 2) ) - maxRandomForWeights],
 			//2 biases
-			biases: [(Math.random() * 25) - 2, (Math.random() * 2) - 1],
+			biases: [(Math.random() * (maxRandomForBiases * 2) ) - maxRandomForBiases, (Math.random() * (maxRandomForBiases * 2) ) - maxRandomForBiases],
 			//4 weights
-			weights2: [(Math.random() * 2) - 1, (Math.random() * 2) - 1],
+			weights2: [(Math.random() * (maxRandomForWeights * 2) ) - maxRandomForWeights, (Math.random() * (maxRandomForWeights * 2) ) - maxRandomForWeights],
             //1 bias
-            bias2: (Math.random()  * 2) - 1
+            bias2: (Math.random() * (maxRandomForBiases * 2) ) - maxRandomForBiases
 
 			//1 output
 		});
@@ -40,18 +47,18 @@ function init(numOfnns) {
 function calcOutput(input1, input2, index) {
 	//Calculates the input of the two hidden neurons
 	//While this could be done all at once, I find it's easier to understand this way.
-	var hn1 = sigmoid((input1 * neuralNetworks[index].weights1[0]) + (input2 * neuralNetworks[index].weights1[2]) + neuralNetworks[index].biases[0]);
+	var hn1 = squish((input1 * neuralNetworks[index].weights1[0]) + (input2 * neuralNetworks[index].weights1[2]) + neuralNetworks[index].biases[0], squishingFunction);
 
-	var hn2 = sigmoid((input1 * neuralNetworks[index].weights1[1]) + (input2 * neuralNetworks[index].weights1[3]) + neuralNetworks[index].biases[1]);
+	var hn2 = squish( (input1 * neuralNetworks[index].weights1[1]) + (input2 * neuralNetworks[index].weights1[3]) + neuralNetworks[index].biases[1], squishingFunction);
 
-	var output = sigmoid(hn1 * neuralNetworks[index].weights2[0] + hn2 * neuralNetworks[index].weights2[1]);
+	var output = squish(hn1 * neuralNetworks[index].weights2[0] + hn2 * neuralNetworks[index].weights2[1], squishingFunction);
 
 	return output;
 
 }
 
 //Initializes the amount of neural networks requested by the user with random weights and biases
-init(1000);
+init(2500);
 
 function cycle(){
 var sumCost = 0;
@@ -126,16 +133,16 @@ var meanCost;
 	//First, we make sure that nobody the number of nn's has gotten lower
 	if (maxNumOfNNs - neuralNetworks.length > 0) {
 		for (var i = 0; i < (maxNumOfNNs - neuralNetworks.length); i++) {
-			var nn1 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
+var nn1 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
 			var nn2 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
 			neuralNetworks.push({
-				weights1: [(Math.random()) > 0.5 ? nn1.weights1[0] * Math.random() * maxMutation : nn2.weights1[0], (Math.random()) > 0.5 ? nn1.weights1[1] : nn2.weights1[1], (Math.random()) > 0.5 ? nn1.weights1[2] : nn2.weights1[2], (Math.random()) > 0.5 ? nn1.weights1[3] : nn2.weights1[3]],
-				biases: [(Math.random()) > 0.5 ? nn1.biases[0] * Math.random() * maxMutation : nn2.biases[0] * Math.random() * maxMutation, (Math.random()) > 0.5 ? nn1.biases[1] * Math.random() * maxMutation : nn2.biases[1] * Math.random() * maxMutation],
-				weights2: [(Math.random()) > 0.5 ? nn1.weights2[0] * Math.random() * maxMutation : nn2.weights2[0], (Math.random()) > 0.5 ? nn1.weights2[1] : nn2.weights2[1], (Math.random()) > 0.5 ? nn1.weights2[2] : nn2.weights2[2], (Math.random()) > 0.5 ? nn1.weights2[3] : nn2.weights2[3]]
+				weights1: [(Math.random()) > 0.5 ? nn1.weights1[0] + Math.random() > 0.5 ? Math.random() * maxMutation : Math.random() * -maxMutation : nn2.weights1[0], (Math.random()) > 0.5 ? nn1.weights1[1] : nn2.weights1[1], (Math.random()) > 0.5 ? nn1.weights1[2] : nn2.weights1[2], (Math.random()) > 0.5 ? nn1.weights1[3] : nn2.weights1[3]],
+				biases: [(Math.random()) > 0.5 ? nn1.biases[0] + Math.random() > 0.5 ? Math.random() * maxMutation :Math.random() * -maxMutation : nn2.biases[0] + Math.random() > 0.5 ? Math.random() * maxMutation :Math.random() * -maxMutation, (Math.random()) > 0.5 ? nn1.biases[1] + Math.random() > 0.5 ? Math.random() * maxMutation :Math.random() * -maxMutation : nn2.biases[1] + Math.random() > 0.5 ? Math.random() * maxMutation :Math.random() * -maxMutation],
+				weights2: [(Math.random()) > 0.5 ? nn1.weights2[0] + Math.random() > 0.5 ? Math.random() * maxMutation :Math.random() * -maxMutation : nn2.weights2[0], (Math.random()) > 0.5 ? nn1.weights2[1] : nn2.weights2[1], (Math.random()) > 0.5 ? nn1.weights2[2] : nn2.weights2[2], (Math.random()) > 0.5 ? nn1.weights2[3] : nn2.weights2[3]]
 			});
 		}
         
-          document.getElementById('test').innerHTML = meanCost + "<p>" + neuralNetworks.length + "</p>" + "<p>" + costs[0]+"</p>" + calcOutput(0, 1, 0) + "<p>" + costs.length + "</p>";          
+          document.getElementById('test').innerHTML = meanCost + "<p>" + neuralNetworks.length + "</p>" + "<p>" + costs[0]+"</p>" + calcOutput(1, 0, 0) + "<p>" ;          
 	} else {
       document.getElementById('test').innerHTML = "DONE!";
       document.getElementById('test').innerHTML += "<p> " + calcOutput(1, 0, 0) + "</p>" ;
