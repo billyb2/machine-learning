@@ -1,9 +1,9 @@
+<p id="test"></p>
 <script>
 //Stores all nn's
 var neuralNetworks = [];
 var outputs = [];
 var costs = [];
-var test = [];
 
 var maxNumOfNNs = 0;
 
@@ -51,6 +51,7 @@ function calcOutput(input1, input2, index){
 //Initializes the amount of neural networks requested by the user with random weights and biases
 init(100);
 
+setInterval(function(){
 //Calculate all the outputs for all the NN's and all possible inputs, and store it in the outputs array.
 for(var i = 0; i < neuralNetworks.length; i++){
 	outputs.push( [calcOutput(0, 0, i), calcOutput(0, 1, i), calcOutput(1, 1, i), calcOutput(1, 0, i)] );
@@ -117,15 +118,18 @@ if (maxNumOfNNs - neuralNetworks.length > 0){
 	for (var i = 0; i < (maxNumOfNNs - neuralNetworks.length); i ++){
     	var nn1 = neuralNetworks[ Math.floor(Math.random() * neuralNetworks.length) ];
         var nn2 = neuralNetworks[ Math.floor(Math.random() * neuralNetworks.length) ];
-    	test.push({
+    	neuralNetworks.push({
         weights1: [ (Math.random()) > 0.5 ? nn1.weights1[0] * Math.random() * maxMutation : nn2.weights1[0],  (Math.random()) > 0.5 ? nn1.weights1[1] : nn2.weights1[1],  (Math.random()) > 0.5 ? nn1.weights1[2] : nn2.weights1[2],  (Math.random()) > 0.5 ? nn1.weights1[3] : nn2.weights1[3] ],
-        biases: [ (Math.random()) > 0.5 ? nn1.biases[0] : nn2.biases[0] ]
+        biases: [ (Math.random()) > 0.5 ? nn1.biases[0] * Math.random() * maxMutation : nn2.biases[0]* Math.random() * maxMutation, (Math.random()) > 0.5 ? nn1.biases[1] * Math.random() * maxMutation : nn2.biases[1]* Math.random() * maxMutation ],
+        weights2 : [ (Math.random()) > 0.5 ? nn1.weights1[0] * Math.random() * maxMutation : nn2.weights1[0],  (Math.random()) > 0.5 ? nn1.weights1[1] : nn2.weights1[1],  (Math.random()) > 0.5 ? nn1.weights1[2] : nn2.weights1[2],  (Math.random()) > 0.5 ? nn1.weights1[3] : nn2.weights1[3] ]
 		});
     }
                  
 }
 
-alert(test[0].weights1);
-                 
+
+document.getElementById("test").innerHTML = meanCost
+
+         }, 100);        
 
 </script>
