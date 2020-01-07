@@ -10,7 +10,7 @@ var maxNumOfNNs = 0;
 var sumCost = 0;
 var meanCost;
 
-var maxMutation = 0.001
+var maxMutation = 0.001;
 
 //Sigmoid function
 //https://www.justgivemeanexample.com/example/create-a-sigmoid-function-in-javascript
@@ -26,9 +26,11 @@ function init(numOfnns) {
 			//4 weights
 			weights1: [(Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1, (Math.random() * 2) - 1],
 			//2 biases
-			biases: [(Math.random() * 20) - 10, (Math.random() * 20) - 10],
+			biases: [(Math.random() * 25) - 2, (Math.random() * 2) - 1],
 			//4 weights
-			weights2: [(Math.random() * 2) - 1, (Math.random() * 2) - 1]
+			weights2: [(Math.random() * 2) - 1, (Math.random() * 2) - 1],
+            //1 bias
+            bias2: (Math.random()  * 2) - 1
 
 			//1 output
 		});
@@ -49,7 +51,7 @@ function calcOutput(input1, input2, index) {
 }
 
 //Initializes the amount of neural networks requested by the user with random weights and biases
-init(100);
+init(1000);
 
 function cycle(){
 var sumCost = 0;
@@ -89,7 +91,7 @@ var meanCost;
 
 
 	//And divide it by the number of costs
-	meanCost = (sumCost / costs.length);
+	meanCost = (sumCost/costs.length);
 
 	//Now we check every individual agorithm's cost, and if the cost is higher than the average (which means it performed worse), it dies. 
 	//Gruesome ik
@@ -101,15 +103,16 @@ var meanCost;
 	/**While this is a pretty complex and computationally expensive method, 
 	it's a simple one to produce. If i just removed all of the bad indexes with array.splice(), it would always stop after removing 50.
 	**/
+
 	for (var i = 0; i < costs.length; i++) {
 
-
-		if (costs[i] > meanCost) {
+		if (costs[i] >= meanCost) {
 			badIndexes.push(i);
 		}
 	}
 
 
+    
 	for (var i = 0; i < badIndexes.length; i++) {
 		costs.splice(badIndexes[i], 1);
 		neuralNetworks.splice(badIndexes[i], 1);
@@ -132,11 +135,14 @@ var meanCost;
 			});
 		}
         
-          document.getElementById('test').innerHTML = meanCost + "<p>" + neuralNetworks.length + "</p>";
-
+          document.getElementById('test').innerHTML = meanCost + "<p>" + neuralNetworks.length + "</p>" + "<p>" + costs[0]+"</p>" + calcOutput(0, 1, 0) + "<p>" + costs.length + "</p>";          
 	} else {
       document.getElementById('test').innerHTML = "DONE!";
+      document.getElementById('test').innerHTML += "<p> " + calcOutput(1, 0, 0) + "</p>" ;
+
     }
+    
+    
     
       
 
