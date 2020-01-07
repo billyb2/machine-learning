@@ -4,6 +4,8 @@ var neuralNetworks = [];
 var outputs = [];
 var costs = [];
 
+var maxNumOfNNs = 0;
+
 var sumCost = 0;
 var meanCost;
 
@@ -14,6 +16,7 @@ function sigmoid(input) {
 }
 
 function init(numOfnns) {
+maxNumOfNNs = numOfnns;
 	for (var i = 0; i < numOfnns; i++) {
 		neuralNetworks.push({
 			//2 inputs
@@ -84,7 +87,6 @@ meanCost = (sumCost/costs.length);
 //Do this repeatedly, until the number of neural networks is below half of the original amount and there's an even number
 //Again, this is a really lazy approach to doing this, but it should work for the time being
 
-alert(costs.length);
 var badIndexes = [];
 
 /**While this is a pretty complex and computationally expensive method, 
@@ -100,9 +102,23 @@ for(var i = 0; i < costs.length; i++){
 
 for(var i = 0; i < badIndexes.length; i ++){
 	costs.splice(badIndexes[i], 1);
+	neuralNetworks.splice(badIndexes[i], 1);
+	outputs.splice(badIndexes[i], 1);
+
 }
+
+
 
 //Now for the actual reproduction/mutation part
 
+//First, we make sure that nobody the number of nn's has gotten lower
+if (maxNumOfNNs - neuralNetworks.length > 0){
+	for (var i = 0; i < (maxNumOfNNs - neuralNetworks.length); i ++){
+    	neuralNetworks.push({
+			weights1:
+		});
+    }
+}
+	
 
 </script>
