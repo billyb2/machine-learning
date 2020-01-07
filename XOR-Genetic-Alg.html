@@ -10,7 +10,7 @@ var maxNumOfNNs = 0;
 var sumCost = 0;
 var meanCost;
 
-var maxMutation = 0.01
+var maxMutation = 0.001
 
 //Sigmoid function
 //https://www.justgivemeanexample.com/example/create-a-sigmoid-function-in-javascript
@@ -19,7 +19,7 @@ function sigmoid(input) {
 }
 
 function init(numOfnns) {
-maxNumOfNNs = numOfnns;
+	maxNumOfNNs = numOfnns;
 	for (var i = 0; i < numOfnns; i++) {
 		neuralNetworks.push({
 			//2 inputs
@@ -35,101 +35,115 @@ maxNumOfNNs = numOfnns;
 	}
 }
 
-function calcOutput(input1, input2, index){
+function calcOutput(input1, input2, index) {
 	//Calculates the input of the two hidden neurons
-    //While this could be done all at once, I find it's easier to understand this way.
-	var hn1 = sigmoid( (input1 * neuralNetworks[index].weights1[0]) + (input2 *  neuralNetworks[index].weights1[2]) + neuralNetworks[index].biases[0]);
-    
-    var hn2 = sigmoid( (input1 * neuralNetworks[index].weights1[1]) + (input2 *  neuralNetworks[index].weights1[3]) + neuralNetworks[index].biases[1]);
-    
-    var output = sigmoid( hn1 * neuralNetworks[index].weights2[0] + hn2 * neuralNetworks[index].weights2[1]);
-    
-    return output;
-    
+	//While this could be done all at once, I find it's easier to understand this way.
+	var hn1 = sigmoid((input1 * neuralNetworks[index].weights1[0]) + (input2 * neuralNetworks[index].weights1[2]) + neuralNetworks[index].biases[0]);
+
+	var hn2 = sigmoid((input1 * neuralNetworks[index].weights1[1]) + (input2 * neuralNetworks[index].weights1[3]) + neuralNetworks[index].biases[1]);
+
+	var output = sigmoid(hn1 * neuralNetworks[index].weights2[0] + hn2 * neuralNetworks[index].weights2[1]);
+
+	return output;
+
 }
 
 //Initializes the amount of neural networks requested by the user with random weights and biases
 init(100);
 
-setInterval(function(){
-//Calculate all the outputs for all the NN's and all possible inputs, and store it in the outputs array.
-for(var i = 0; i < neuralNetworks.length; i++){
-	outputs.push( [calcOutput(0, 0, i), calcOutput(0, 1, i), calcOutput(1, 1, i), calcOutput(1, 0, i)] );
-}
+function cycle(){
+var sumCost = 0;
+var outputs = [];
+var costs = [];
+var meanCost;
+	//Calculate all the outputs for all the NN's and all possible inputs, and store it in the outputs array.
+	for (var i = 0; i < neuralNetworks.length; i++) {
+		outputs.push([calcOutput(0, 0, i), calcOutput(0, 1, i), calcOutput(1, 1, i), calcOutput(1, 0, i)]);
+	}
 
-//After that's done, calculate the cost using the mean squared error.
-//Again, this could be done in one step, and should be for efficiency's sake, but to make it easier to understand I'm seperating the steps
-for(var i = 0; i < outputs.length; i++){
-	//Calculates the difference between the predicted and actual answer for XOR of 1 and 1 and squares it
-    //Same for all of the others
-    
-	var xor00Difference = Math.pow(outputs[i][0] - 0, 2);
-    var xor01Difference = Math.pow(outputs[i][1] - 1, 2);
-    var xor11Difference = Math.pow(outputs[i][2] - 0, 2);
-    var xor10Difference = Math.pow(outputs[i][3] - 1, 2);
-    
-    //Outputs the mean of the differences to the costs array
-    costs.push( (xor00Difference + xor01Difference + xor11Difference + xor10Difference)/4 );
-    
-}
+	//After that's done, calculate the cost using the mean squared error.
+	//Again, this could be done in one step, and should be for efficiency's sake, but to make it easier to understand I'm seperating the steps
+	for (var i = 0; i < outputs.length; i++) {
+		//Calculates the difference between the predicted and actual answer for XOR of 1 and 1 and squares it
+		//Same for all of the others
 
-//Now there are multiple ways that we could find out which algorithms did the best, but since I'm not smart enough to do it another way, we're going to find the mean of all of the algorithms' costs, and which ever ones are lower than the mean get to survive
+		var xor00Difference = Math.pow(outputs[i][0] - 0, 2);
+		var xor01Difference = Math.pow(outputs[i][1] - 1, 2);
+		var xor11Difference = Math.pow(outputs[i][2] - 0, 2);
+		var xor10Difference = Math.pow(outputs[i][3] - 1, 2);
 
-//First, we've gotta find the mean
+		//Outputs the mean of the differences to the costs array
+        var output =  (xor00Difference + xor01Difference + xor11Difference + xor10Difference)/4
+		costs.push(output);
 
-//Find the sum of all of the costs
-for(var i = 0; i < costs.length; i ++){
-	sumCost += costs[i];
-}
+	}
+
+	//Now there are multiple ways that we could find out which algorithms did the best, but since I'm not smart enough to do it another way, we're going to find the mean of all of the algorithms' costs, and which ever ones are lower than the mean get to survive
+
+	//First, we've gotta find the mean
+
+	//Find the sum of all of the costs
+	for (var i = 0; i < costs.length; i++) {
+		sumCost += costs[i];
+	}
 
 
-//And divide it by the number of costs
-meanCost = (sumCost/costs.length);
+	//And divide it by the number of costs
+	meanCost = (sumCost / costs.length);
 
-//Now we check every individual agorithm's cost, and if the cost is higher than the average (which means it performed worse), it dies. 
-//Gruesome ik
-//Do this repeatedly, until the number of neural networks is below half of the original amount and there's an even number
-//Again, this is a really lazy approach to doing this, but it should work for the time being
+	//Now we check every individual agorithm's cost, and if the cost is higher than the average (which means it performed worse), it dies. 
+	//Gruesome ik
+	//Do this repeatedly, until the number of neural networks is below half of the original amount and there's an even number
+	//Again, this is a really lazy approach to doing this, but it should work for the time being
 
-var badIndexes = [];
+	var badIndexes = [];
 
-/**While this is a pretty complex and computationally expensive method, 
-it's a simple one to produce. If i just removed all of the bad indexes with array.splice(), it would always stop after removing 50.
-**/
-for(var i = 0; i < costs.length; i++){
-	
-    
-	if (costs[i] > meanCost){
-    	badIndexes.push(i);
+	/**While this is a pretty complex and computationally expensive method, 
+	it's a simple one to produce. If i just removed all of the bad indexes with array.splice(), it would always stop after removing 50.
+	**/
+	for (var i = 0; i < costs.length; i++) {
+
+
+		if (costs[i] > meanCost) {
+			badIndexes.push(i);
+		}
+	}
+
+
+	for (var i = 0; i < badIndexes.length; i++) {
+		costs.splice(badIndexes[i], 1);
+		neuralNetworks.splice(badIndexes[i], 1);
+		outputs.splice(badIndexes[i], 1);
+
+	}
+
+
+
+
+	//First, we make sure that nobody the number of nn's has gotten lower
+	if (maxNumOfNNs - neuralNetworks.length > 0) {
+		for (var i = 0; i < (maxNumOfNNs - neuralNetworks.length); i++) {
+			var nn1 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
+			var nn2 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
+			neuralNetworks.push({
+				weights1: [(Math.random()) > 0.5 ? nn1.weights1[0] * Math.random() * maxMutation : nn2.weights1[0], (Math.random()) > 0.5 ? nn1.weights1[1] : nn2.weights1[1], (Math.random()) > 0.5 ? nn1.weights1[2] : nn2.weights1[2], (Math.random()) > 0.5 ? nn1.weights1[3] : nn2.weights1[3]],
+				biases: [(Math.random()) > 0.5 ? nn1.biases[0] * Math.random() * maxMutation : nn2.biases[0] * Math.random() * maxMutation, (Math.random()) > 0.5 ? nn1.biases[1] * Math.random() * maxMutation : nn2.biases[1] * Math.random() * maxMutation],
+				weights2: [(Math.random()) > 0.5 ? nn1.weights2[0] * Math.random() * maxMutation : nn2.weights2[0], (Math.random()) > 0.5 ? nn1.weights2[1] : nn2.weights2[1], (Math.random()) > 0.5 ? nn1.weights2[2] : nn2.weights2[2], (Math.random()) > 0.5 ? nn1.weights2[3] : nn2.weights2[3]]
+			});
+		}
+        
+          document.getElementById('test').innerHTML = meanCost + "<p>" + neuralNetworks.length + "</p>";
+
+	} else {
+      document.getElementById('test').innerHTML = "DONE!";
     }
-}
-
-for(var i = 0; i < badIndexes.length; i ++){
-	costs.splice(badIndexes[i], 1);
-	neuralNetworks.splice(badIndexes[i], 1);
-	outputs.splice(badIndexes[i], 1);
-
-}
+    
+      
 
 
+requestAnimationFrame(cycle)
+}     
 
-//First, we make sure that nobody the number of nn's has gotten lower
-if (maxNumOfNNs - neuralNetworks.length > 0){
-	for (var i = 0; i < (maxNumOfNNs - neuralNetworks.length); i ++){
-    	var nn1 = neuralNetworks[ Math.floor(Math.random() * neuralNetworks.length) ];
-        var nn2 = neuralNetworks[ Math.floor(Math.random() * neuralNetworks.length) ];
-    	neuralNetworks.push({
-        weights1: [ (Math.random()) > 0.5 ? nn1.weights1[0] * Math.random() * maxMutation : nn2.weights1[0],  (Math.random()) > 0.5 ? nn1.weights1[1] : nn2.weights1[1],  (Math.random()) > 0.5 ? nn1.weights1[2] : nn2.weights1[2],  (Math.random()) > 0.5 ? nn1.weights1[3] : nn2.weights1[3] ],
-        biases: [ (Math.random()) > 0.5 ? nn1.biases[0] * Math.random() * maxMutation : nn2.biases[0]* Math.random() * maxMutation, (Math.random()) > 0.5 ? nn1.biases[1] * Math.random() * maxMutation : nn2.biases[1]* Math.random() * maxMutation ],
-        weights2 : [ (Math.random()) > 0.5 ? nn1.weights1[0] * Math.random() * maxMutation : nn2.weights1[0],  (Math.random()) > 0.5 ? nn1.weights1[1] : nn2.weights1[1],  (Math.random()) > 0.5 ? nn1.weights1[2] : nn2.weights1[2],  (Math.random()) > 0.5 ? nn1.weights1[3] : nn2.weights1[3] ]
-		});
-    }
-                 
-}
-
-
-document.getElementById("test").innerHTML = meanCost
-
-         }, 100);        
+cycle();
 
 </script>
