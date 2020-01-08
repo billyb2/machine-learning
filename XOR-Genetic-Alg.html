@@ -60,7 +60,7 @@ function init(numOfnns) {
 			//2 biases
 			biases: [getRandomFloat(-maxRandomForBiases, maxRandomForBiases), getRandomFloat(-maxRandomForBiases, maxRandomForBiases)],
 			//4 weights
-			weights2: [getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights)],
+			weights2: [getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights)],
             //1 bias
             bias2: getRandomFloat(-maxRandomForBiases, maxRandomForBiases)
 
@@ -233,27 +233,19 @@ ctx.fillRect(60, 50, 20, 20);
 //Hidden - Output weights
 ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights2[0]);
 ctx.beginPath();
-ctx.moveTo(80, 35);
+ctx.moveTo(80, 10);
 ctx.lineTo(120, 35);
 ctx.stroke();
 
 ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights2[1]);
 ctx.beginPath();
-ctx.moveTo(80, 35);
+ctx.moveTo(80, 60);
 ctx.lineTo(120, 35);
 ctx.stroke();
 
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights2[2]);
-ctx.beginPath();
-ctx.moveTo(80, 35);
-ctx.lineTo(120, 35);
-ctx.stroke();
-
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights2[3]);
-ctx.beginPath();
-ctx.moveTo(80, 35);
-ctx.lineTo(120, 35);
-ctx.stroke();
+//Output is just black
+ctx.fillStyle ="black";
+ctx.fillRect(120, 25, 20, 20);
 
 
 requestAnimationFrame(cycle)
