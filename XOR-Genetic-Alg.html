@@ -129,15 +129,6 @@ var meanCost;
 	//And divide it by the number of costs
 	meanCost = (sumCost/costs.length);
 
-	//Now we check every individual agorithm's cost, and if the cost is higher than the average (which means it performed worse), it dies. 
-	//Gruesome ik
-	//Do this repeatedly, until the number of neural networks is below half of the original amount and there's an even number
-	//Again, this is a really lazy approach to doing this, but it should work for the time being
-
-	/**While this is a pretty complex and computationally expensive method, 
-	it's a simple one to produce. If i just removed all of the bad indexes with array.splice(), it would always stop after removing 50.
-	**/
-
 //Sort the arrays in descending order from least to greatest, and then let's the top x percent survive. I'm currently using 25 %
 
 //It's like that one movie I can't remember the name of
