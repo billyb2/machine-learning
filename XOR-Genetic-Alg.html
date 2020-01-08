@@ -1,5 +1,6 @@
 <p id="test"></p>
 <script>
+
 //Stores all nn's
 var neuralNetworks = [];
 var outputs = [];
@@ -66,7 +67,6 @@ function calcOutput(input1, input2, index) {
 
 //Initializes the amount of neural networks requested by the user with random weights and biases
 init(2500);
-alert(neuralNetworks.bias2)
 
 
 function cycle(){
@@ -120,21 +120,30 @@ var meanCost;
 	it's a simple one to produce. If i just removed all of the bad indexes with array.splice(), it would always stop after removing 50.
 	**/
 
-	for (var i = 0; i < costs.length; i++) {
+//Sort the arrays in descending order from least to greatest, and then delete the bottom half.
 
-		if (costs[i] >= meanCost) {
-			badIndexes.push(i);
-		}
-	}
+   var len = costs.length;
+   for (var i = len-1; i>=0; i--){
+     for(var j = 1; j<=i; j++){
+       if(costs[j-1]>costs[j]){
+           var temp = costs[j-1];
+           var temp2 = neuralNetworks[j-1];
+           
+           costs[j-1] = costs[j];
+           costs[j] = temp;
+           
+           neuralNetworks[j-1] = neuralNetworks[j];
+           neuralNetworks[j] = temp2;
+        }
+     }
+   }
+   
+   neuralNetworks.splice(Math.floor(neuralNetworks.length/2) )
+   costs.splice(Math.floor(costs.length/2) )
+   
+   
 
 
-    
-	for (var i = 0; i < badIndexes.length; i++) {
-		costs.splice(badIndexes[i], 1);
-		neuralNetworks.splice(badIndexes[i], 1);
-		outputs.splice(badIndexes[i], 1);
-
-	}
 
 
 	//First, we make sure that nobody the number of nn's has gotten lower
@@ -171,6 +180,7 @@ requestAnimationFrame(cycle)
 }     
 
 cycle();
+
 
 
 
