@@ -13,9 +13,13 @@ var meanCost;
 
 var maxMutation = 0.0001;
 var squishingFunction = "tanh";
-var maxRandomForWeights = 1;
-var maxRandomForBiases = 1;
+var maxRandomForWeights = 50;
+var maxRandomForBiases = 50;
 
+//Number of iterations done so far
+var iterations = 0;
+//Maximum number of iterations, leave at 0 to go on forever
+var maxIterations = 10000;
 //Sigmoid function
 //https://www.justgivemeanexample.com/example/create-a-sigmoid-function-in-javascript
 function squish(input, method) {
@@ -66,10 +70,12 @@ function calcOutput(input1, input2, index) {
 }
 
 //Initializes the amount of neural networks requested by the user with random weights and biases
-init(2500);
+init(5000);
 
 
 function cycle(){
+iterations ++;
+
 var sumCost = 0;
 var outputs = [];
 var costs = [];
@@ -120,8 +126,9 @@ var meanCost;
 	it's a simple one to produce. If i just removed all of the bad indexes with array.splice(), it would always stop after removing 50.
 	**/
 
-//Sort the arrays in descending order from least to greatest, and then delete the bottom half.
+//Sort the arrays in descending order from least to greatest, and then let's the top x percent survive. I'm currently using 25 %
 
+//It's like that one movie I can't remember the name of
    var len = costs.length;
    for (var i = len-1; i>=0; i--){
      for(var j = 1; j<=i; j++){
@@ -138,8 +145,8 @@ var meanCost;
      }
    }
    
-   neuralNetworks.splice(Math.floor(neuralNetworks.length/2) )
-   costs.splice(Math.floor(costs.length/2) )
+   neuralNetworks.splice(Math.floor(neuralNetworks.length * 0.25) )
+   costs.splice(Math.floor(costs.length * 0.25) )
    
    
 
@@ -147,7 +154,7 @@ var meanCost;
 
 
 	//First, we make sure that nobody the number of nn's has gotten lower
-	if (maxNumOfNNs - neuralNetworks.length > 0) {
+	if (maxNumOfNNs - neuralNetworks.length > 0 && maxIterations > 0 && iterations <= maxIterations) {
 		for (var i = 0; i < (maxNumOfNNs - neuralNetworks.length); i++) {
 var nn1 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
 			var nn2 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
@@ -158,17 +165,16 @@ var nn1 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
                 
 				weights2:[ (Math.random()) > 0.5 ? nn1.weights2[0] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights2[0]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights2[1] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights2[1]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights2[2] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights2[2]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights2[3] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights2[3]+ getRandomFloat(-maxMutation, maxMutation) ],
                 
-                bias2: [ (Math.random()) > 0.5 ? nn1.bias2[0] + getRandomFloat(-maxMutation, maxMutation) : nn2.bias2[0]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.bias2[1] + getRandomFloat(-maxMutation, maxMutation) : nn2.bias2[1] + getRandomFloat(-maxMutation, maxMutation) ]
+                bias2: (Math.random()) > 0.5 ? nn1.bias2[0] + getRandomFloat(-maxMutation, maxMutation) : nn2.bias2[0]+ getRandomFloat(-maxMutation, maxMutation)
 			});
             
 		}
         
         
         
-          document.getElementById('test').innerHTML = meanCost + "<p>" + neuralNetworks.length + "</p>" + "<p>" + costs[0]+"</p>" + calcOutput(1, 0, 0) + "<p>" ;          
+          document.getElementById('test').innerHTML = meanCost + "<p> 0 0 " + calcOutput(0, 0, 0) + "<p>" + "<p> 0 1 " + calcOutput(0, 1, 0) + "<p>" + "<p> 1 0 " + calcOutput(1, 0, 0) + "<p>"  + "<p> 1 1 " + calcOutput(1, 1, 0) + "<p>" + "<p>" + iterations + "</p>";          
 	} else {
-      document.getElementById('test').innerHTML = "DONE!";
-      document.getElementById('test').innerHTML += "<p> " + calcOutput(1, 0, 0) + "</p>" ;
+      document.getElementById('test').innerHTML = "DONE!" + "<p> 0 0 " + calcOutput(0, 0, 0) + "<p>" + "<p> 0 1 " + calcOutput(0, 1, 0) + "<p>" + "<p> 1 0 " + calcOutput(1, 0, 0) + "<p>"  + "<p> 1 1 " + calcOutput(1, 1, 0) + "<p>" + "<p>" + iterations + "</p>";
 
     }
     
