@@ -1,0 +1,106 @@
+<p id="Q"></p>
+<canvas id="canvas"></canvas>
+<button onclick="frame()">Frame!</button>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext('2d');
+ctx.canvas.height = 400
+//The importance of memory
+var gamma = 0.8;
+  var R =
+  [
+  	[-1, -1, -1, -1, 0,  -1],
+  	[-1, -1, -1,  0,-1, 100],
+  	[-1, -1, -1,  0,-1,  -1],
+  	[-1,  0,  0, -1, 0,  -1],
+  	[ 0, -1, -1,  0,-1, 100],
+  	[-1,  0, -1, -1, 0, 100]
+  ];
+  
+  var Q =   [
+  	[0, 0, 0, 0, 0,  0],
+  	[0, 0, 0, 0, 0,  0],
+  	[0, 0, 0, 0, 0,  0],
+  	[0, 0, 0, 0, 0,  0],
+  	[0, 0, 0, 0, 0,  0],
+  	[0, 0, 0, 0, 0,  0]
+  ];
+  
+  var q = Q;
+  	var state = Math.floor(Math.random() * 6);
+
+function frame(){
+
+  if(state == 5){
+   state = Math.floor(Math.random() * 6);
+  }
+  
+  var action = Math.floor(Math.random() * 6);
+
+while(R[state][action] == -1){
+  	action = Math.floor(Math.random() * 6);
+}
+
+var possibleActions = [];
+var possibleActionsQ = [];
+
+for(var i = 0; i < 6; i ++){
+  if (R[action][i] !== -1){
+      possibleActions.push(i);
+      possibleActionsQ.push( Q[action][i]);
+  }
+  if(i == 0){
+  	document.getElementById("Q").innerHTML = "";
+  }
+  document.getElementById("Q").innerHTML += "<p> " + i + " [" + Q[i] + "]</p>";
+
+}
+
+
+Q[state][action] = Math.round(R[state][action] + gamma * Math.max.apply(null, possibleActionsQ));
+
+state = action;
+  
+ctx.fillStyle = "black";
+ctx.fillRect(0, 50, 50, 50);
+ctx.fillRect(0, 100, 50, 50);
+ctx.fillRect(50, 100, 50, 50);
+ctx.fillRect(50, 50, 50, 50);
+ctx.fillRect(100, 100, 50, 50);
+ctx.fillRect(100, 50, 50, 50);
+
+
+
+ctx.font = '20px Arial';
+ctx.fillStyle = "blue";
+ctx.fillText("0", 15, 80);
+ctx.fillText("4", 15, 130);
+ctx.fillText("1", 65, 80);
+ctx.fillText("3", 65, 130);
+ctx.fillText("2", 115, 130);
+ctx.fillText("5", 65, 30);
+ctx.fillText("5", 15, 180);
+
+ctx.fillStyle = "white";
+if(state == 1){
+	ctx.fillRect(60, 60, 25, 25);
+} else if(state == 0) {
+	ctx.fillRect(12, 60, 25, 25);
+} else if(state == 4){
+	ctx.fillRect(12, 110, 25, 25);
+} else if(state == 3){
+	ctx.fillRect(60, 110, 25, 25);
+} else if(state == 2){
+	ctx.fillRect(110, 110, 25, 25);
+} else if(state == 5){
+	ctx.fillRect(110, 60, 25, 25);
+}
+
+
+
+
+
+
+}
+frame();
+</script>
