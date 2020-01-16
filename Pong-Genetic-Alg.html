@@ -1,41 +1,22 @@
-<canvas id="canvas"> </canvas>
-<p id="test"></p>
+<canvas id="canvas"></canvas>
 
 <script>
-function Rainbow(){"use strict";var a=null,i=0,o=100,l=["ff0000","ffff00","00ff00","0000ff"];function F(e){if(e.length<2)throw new Error("Rainbow must have two or more colours.");var r=(o-i)/(e.length-1),F=new ColourGradient;F.setGradient(e[0],e[1]),F.setNumberRange(i,i+r),a=[F];for(var t=1;t<e.length-1;t++){var n=new ColourGradient;n.setGradient(e[t],e[t+1]),n.setNumberRange(i+r*t,i+r*(t+1)),a[t]=n}l=e}F(l),this.setSpectrum=function(){return F(arguments),this},this.setSpectrumByArray=function(e){return F(e),this},this.colourAt=function(e){if(isNaN(e))throw new TypeError(e+" is not a number");if(1===a.length)return a[0].colourAt(e);var r=(o-i)/a.length,F=Math.min(Math.floor((Math.max(e,i)-i)/r),a.length-1);return a[F].colourAt(e)},this.colorAt=this.colourAt,this.setNumberRange=function(e,r){if(!(e<r))throw new RangeError("maxNumber ("+r+") is not greater than minNumber ("+e+")");return i=e,o=r,F(l),this}}function ColourGradient(){"use strict";var F="ff0000",t="0000ff",u=0,s=100;function r(e,r,F){var t=e;t<u&&(t=u),s<t&&(t=s);var n,a=s-u,i=parseInt(r,16),o=(parseInt(F,16)-i)/a,l=Math.round(o*(t-u)+i);return 1===(n=l.toString(16)).length?"0"+n:n}function n(e){if(/^#?[0-9a-fA-F]{6}$/i.test(e))return e.substring(e.length-6,e.length);var r=e.toLowerCase();if(a.hasOwnProperty(r))return a[r];throw new Error(e+" is not a valid colour.")}this.setGradient=function(e,r){F=n(e),t=n(r)},this.setNumberRange=function(e,r){if(!(e<r))throw new RangeError("maxNumber ("+r+") is not greater than minNumber ("+e+")");u=e,s=r},this.colourAt=function(e){return r(e,F.substring(0,2),t.substring(0,2))+r(e,F.substring(2,4),t.substring(2,4))+r(e,F.substring(4,6),t.substring(4,6))};var a={aliceblue:"F0F8FF",antiquewhite:"FAEBD7",aqua:"00FFFF",aquamarine:"7FFFD4",azure:"F0FFFF",beige:"F5F5DC",bisque:"FFE4C4",black:"000000",blanchedalmond:"FFEBCD",blue:"0000FF",blueviolet:"8A2BE2",brown:"A52A2A",burlywood:"DEB887",cadetblue:"5F9EA0",chartreuse:"7FFF00",chocolate:"D2691E",coral:"FF7F50",cornflowerblue:"6495ED",cornsilk:"FFF8DC",crimson:"DC143C",cyan:"00FFFF",darkblue:"00008B",darkcyan:"008B8B",darkgoldenrod:"B8860B",darkgray:"A9A9A9",darkgreen:"006400",darkgrey:"A9A9A9",darkkhaki:"BDB76B",darkmagenta:"8B008B",darkolivegreen:"556B2F",darkorange:"FF8C00",darkorchid:"9932CC",darkred:"8B0000",darksalmon:"E9967A",darkseagreen:"8FBC8F",darkslateblue:"483D8B",darkslategray:"2F4F4F",darkslategrey:"2F4F4F",darkturquoise:"00CED1",darkviolet:"9400D3",deeppink:"FF1493",deepskyblue:"00BFFF",dimgray:"696969",dimgrey:"696969",dodgerblue:"1E90FF",firebrick:"B22222",floralwhite:"FFFAF0",forestgreen:"228B22",fuchsia:"FF00FF",gainsboro:"DCDCDC",ghostwhite:"F8F8FF",gold:"FFD700",goldenrod:"DAA520",gray:"808080",green:"008000",greenyellow:"ADFF2F",grey:"808080",honeydew:"F0FFF0",hotpink:"FF69B4",indianred:"CD5C5C",indigo:"4B0082",ivory:"FFFFF0",khaki:"F0E68C",lavender:"E6E6FA",lavenderblush:"FFF0F5",lawngreen:"7CFC00",lemonchiffon:"FFFACD",lightblue:"ADD8E6",lightcoral:"F08080",lightcyan:"E0FFFF",lightgoldenrodyellow:"FAFAD2",lightgray:"D3D3D3",lightgreen:"90EE90",lightgrey:"D3D3D3",lightpink:"FFB6C1",lightsalmon:"FFA07A",lightseagreen:"20B2AA",lightskyblue:"87CEFA",lightslategray:"778899",lightslategrey:"778899",lightsteelblue:"B0C4DE",lightyellow:"FFFFE0",lime:"00FF00",limegreen:"32CD32",linen:"FAF0E6",magenta:"FF00FF",maroon:"800000",mediumaquamarine:"66CDAA",mediumblue:"0000CD",mediumorchid:"BA55D3",mediumpurple:"9370DB",mediumseagreen:"3CB371",mediumslateblue:"7B68EE",mediumspringgreen:"00FA9A",mediumturquoise:"48D1CC",mediumvioletred:"C71585",midnightblue:"191970",mintcream:"F5FFFA",mistyrose:"FFE4E1",moccasin:"FFE4B5",navajowhite:"FFDEAD",navy:"000080",oldlace:"FDF5E6",olive:"808000",olivedrab:"6B8E23",orange:"FFA500",orangered:"FF4500",orchid:"DA70D6",palegoldenrod:"EEE8AA",palegreen:"98FB98",paleturquoise:"AFEEEE",palevioletred:"DB7093",papayawhip:"FFEFD5",peachpuff:"FFDAB9",peru:"CD853F",pink:"FFC0CB",plum:"DDA0DD",powderblue:"B0E0E6",purple:"800080",red:"FF0000",rosybrown:"BC8F8F",royalblue:"4169E1",saddlebrown:"8B4513",salmon:"FA8072",sandybrown:"F4A460",seagreen:"2E8B57",seashell:"FFF5EE",sienna:"A0522D",silver:"C0C0C0",skyblue:"87CEEB",slateblue:"6A5ACD",slategray:"708090",slategrey:"708090",snow:"FFFAFA",springgreen:"00FF7F",steelblue:"4682B4",tan:"D2B48C",teal:"008080",thistle:"D8BFD8",tomato:"FF6347",turquoise:"40E0D0",violet:"EE82EE",wheat:"F5DEB3",white:"FFFFFF",whitesmoke:"F5F5F5",yellow:"FFFF00",yellowgreen:"9ACD32"}}"undefined"!=typeof module&&(module.exports=Rainbow);
-</script>
-<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext('2d');
 
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d')
+ctx.canvas.width = 650;
+ctx.canvas.height = 500;
 
-var rainbow = new Rainbow();
-rainbow.setSpectrum("white", "black");
 
-//Stores all nn's
 var neuralNetworks = [];
-var outputs = [];
-var costs = [];
+var players = [];
+var balls = [];
+
+var maxRandomWeight = 7;
+var maxRandomBias = 7;
 
 var maxNumOfNNs = 0;
 
-var sumCost = 0;
-var meanCost;
-
-var maxMutation = 0.0001;
-var squishingFunction = "tanh";
-var maxRandomForWeights = 9;
-var maxRandomForBiases = 9;
-
-rainbow.setNumberRange(-maxRandomForWeights, maxRandomForWeights);
-
-
-//Number of iterations done so far
-var iterations = 0;
-//Maximum number of iterations, leave at 0 to go on forever
-var maxIterations = 10000;
-//Sigmoid function
-//https://www.justgivemeanexample.com/example/create-a-sigmoid-function-in-javascript
 function squish(input, method) {
 	if(method == "sigmoid"){
 		return 1 / (1 + Math.exp(-input));
@@ -44,224 +25,108 @@ function squish(input, method) {
     }
 }
 
+
+//Just gives a random floating point number 
 function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
 
+//Sets up player object-prototype
+//Would normally just setup 2 players, but might add 4 player support
+function Player(player) {
+	this.x = player.x;
+	this.y = player.y
+
+	this.width = player.width;
+	this.height = player.height;
+
+	this.speed = player.speed;
+
+	this.score = 0;
+
+}
 
 
-function init(numOfnns) {
-	maxNumOfNNs = numOfnns;
-	for (var i = 0; i < numOfnns; i++) {
+//Ball object-prototype
+//Again, might have powerups or something if I get the basic game done early, might as well make it easy to have multiple balls
+function Ball(ball) {
+	this.x = ball.x;
+	this.y = ball.y;
+
+	this.width = ball.width;
+	this.height = ball.height;
+
+	this.direction = null;
+	this.speed = ball.speed;
+	this.angle = 0;
+	this.velX = 0;
+	this.velY = 0;
+
+}
+
+//Initializes the arrays above
+//Please make sure the numberOfNeuralNetworks is even
+function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Length, biases2Length){
+	
+    for(var i = 0; i < numberOfNeuralNetworks/2; i++){
+    	
+    }
+
+	//Keeps the maximum number of neural networks there should be.
+	maxNumOfNNs = numberOfNeuralNetworks;
+	for (var i = 0; i < numberOfNeuralNetworks; i++) {
+    	var weights1 = [];
+        var biases1 = [];
+        var weights2 = [];
+        var biases2 = [];
+        
+        //Automates the process of making random weights and biases
+    	for(var i = 0; i < weights1Length; i ++){
+        	weights1.push(getRandomFloat(-maxRandomWeight, maxRandomWeight));
+        }
+        
+    	for(var i = 0; i < biases1Length; i ++){
+        	biases1.push(getRandomFloat(-maxRandomBias, maxRandomBias));
+        }
+        
+    	for(var i = 0; i < weights2Length; i ++){
+        	weights2.push(getRandomFloat(-maxRandomWeight, maxRandomWeight));
+        }
+        
+    	for(var i = 0; i < biases2Length; i ++){
+        	biases2.push(getRandomFloat(-maxRandomBias, maxRandomBias));
+        }
+        
+        
+        
+        
+    
 		neuralNetworks.push({
-			//2 inputs
-			//4 weights
-			weights1: [getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights)],
-			//2 biases
-			biases: [getRandomFloat(-maxRandomForBiases, maxRandomForBiases), getRandomFloat(-maxRandomForBiases, maxRandomForBiases)],
-			//4 weights
-			weights2: [getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights), getRandomFloat(-maxRandomForWeights, maxRandomForWeights)],
-            //1 bias
-            bias2: getRandomFloat(-maxRandomForBiases, maxRandomForBiases)
+			//10 inputs
+            
+			//100 weights
+			weights1: weights1,
+			//10 biases
+			biases1: biases1,
+			//30 weights
+			weights2: weights2,
+            //3 output biases
+            biases2: biases2
 
-			//1 output
+			//3 output
 		});
 	}
 }
 
+init(2, 100, 10, 30, 3);
 
-function calcOutput(input1, input2, index) {
-	//Calculates the input of the two hidden neurons
-	//While this could be done all at once, I find it's easier to understand this way.
-	var hn1 = squish((input1 * neuralNetworks[index].weights1[0]) + (input2 * neuralNetworks[index].weights1[2]) + neuralNetworks[index].biases[0], squishingFunction);
 
-	var hn2 = squish( (input1 * neuralNetworks[index].weights1[1]) + (input2 * neuralNetworks[index].weights1[3]) + neuralNetworks[index].biases[1], squishingFunction);
-
-	var output = squish(hn1 * neuralNetworks[index].weights2[0] + hn2 * neuralNetworks[index].weights2[1] , squishingFunction);
-
-	return output;
-
+function frame(){
+	ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    requestAnimationFrame();
 }
 
-//Initializes the amount of neural networks requested by the user with random weights and biases
-init(5000);
-
-
-function cycle(){
-iterations ++;
-
-var sumCost = 0;
-var outputs = [];
-var costs = [];
-var meanCost;
-	//Calculate all the outputs for all the NN's and all possible inputs, and store it in the outputs array.
-	for (var i = 0; i < neuralNetworks.length; i++) {
-		outputs.push([calcOutput(0, 0, i), calcOutput(0, 1, i), calcOutput(1, 1, i), calcOutput(1, 0, i)]);
-	}
-
-	//After that's done, calculate the cost using the mean squared error.
-	//Again, this could be done in one step, and should be for efficiency's sake, but to make it easier to understand I'm seperating the steps
-	for (var i = 0; i < outputs.length; i++) {
-		//Calculates the difference between the predicted and actual answer for XOR of 1 and 1 and squares it
-		//Same for all of the others
-
-		var xor00Difference = Math.pow(outputs[i][0] - 0, 2);
-		var xor01Difference = Math.pow(outputs[i][1] - 1, 2);
-		var xor11Difference = Math.pow(outputs[i][2] - 0, 2);
-		var xor10Difference = Math.pow(outputs[i][3] - 1, 2);
-
-		//Outputs the mean of the differences to the costs array
-        var output =  (xor00Difference + xor01Difference + xor11Difference + xor10Difference)/4
-		costs.push(output);
-
-	}
-
-	//Now there are multiple ways that we could find out which algorithms did the best, but since I'm not smart enough to do it another way, we're going to find the mean of all of the algorithms' costs, and which ever ones are lower than the mean get to survive
-
-	//First, we've gotta find the mean
-
-	//Find the sum of all of the costs
-	for (var i = 0; i < costs.length; i++) {
-		sumCost += costs[i];
-	}
-
-
-	//And divide it by the number of costs
-	meanCost = (sumCost/costs.length);
-
-	//Now we check every individual agorithm's cost, and if the cost is higher than the average (which means it performed worse), it dies. 
-	//Gruesome ik
-	//Do this repeatedly, until the number of neural networks is below half of the original amount and there's an even number
-	//Again, this is a really lazy approach to doing this, but it should work for the time being
-
-	var badIndexes = [];
-
-	/**While this is a pretty complex and computationally expensive method, 
-	it's a simple one to produce. If i just removed all of the bad indexes with array.splice(), it would always stop after removing 50.
-	**/
-
-//Sort the arrays in descending order from least to greatest, and then let's the top x percent survive. I'm currently using 25 %
-
-//It's like that one movie I can't remember the name of
-   var len = costs.length;
-   for (var i = len-1; i>=0; i--){
-     for(var j = 1; j<=i; j++){
-       if(costs[j-1]>costs[j]){
-           var temp = costs[j-1];
-           var temp2 = neuralNetworks[j-1];
-           
-           costs[j-1] = costs[j];
-           costs[j] = temp;
-           
-           neuralNetworks[j-1] = neuralNetworks[j];
-           neuralNetworks[j] = temp2;
-        }
-     }
-   }
-   
-   neuralNetworks.splice(Math.floor(neuralNetworks.length * 0.25) )
-   costs.splice(Math.floor(costs.length * 0.25) )
-   
-   
-
-
-
-
-	//First, we make sure that nobody the number of nn's has gotten lower
-	if (maxNumOfNNs - neuralNetworks.length > 0 && maxIterations > 0 && iterations <= maxIterations) {
-		for (var i = 0; i < (maxNumOfNNs - neuralNetworks.length); i++) {
-var nn1 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
-			var nn2 = neuralNetworks[Math.floor(Math.random() * neuralNetworks.length)];
-			neuralNetworks.push({
-				weights1: [ (Math.random()) > 0.5 ? nn1.weights1[0] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights1[0]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights1[1] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights1[1]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights1[2] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights1[2]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights1[3] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights1[3]+ getRandomFloat(-maxMutation, maxMutation) ],
-                
-				biases: [ (Math.random()) > 0.5 ? nn1.biases[0] + getRandomFloat(-maxMutation, maxMutation) : nn2.biases[0]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.biases[1] + getRandomFloat(-maxMutation, maxMutation) : nn2.biases[1]+ getRandomFloat(-maxMutation, maxMutation) ],
-                
-				weights2:[ (Math.random()) > 0.5 ? nn1.weights2[0] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights2[0]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights2[1] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights2[1]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights2[2] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights2[2]+ getRandomFloat(-maxMutation, maxMutation), (Math.random()) > 0.5 ? nn1.weights2[3] + getRandomFloat(-maxMutation, maxMutation) : nn2.weights2[3]+ getRandomFloat(-maxMutation, maxMutation) ],
-                
-                bias2: (Math.random()) > 0.5 ? nn1.bias2[0] + getRandomFloat(-maxMutation, maxMutation) : nn2.bias2[0]+ getRandomFloat(-maxMutation, maxMutation)
-			});
-            
-		}
-        
-        
-        
-          document.getElementById('test').innerHTML = meanCost + "<p> 0 0 " + calcOutput(0, 0, 0) + "<p>" + "<p> 0 1 " + calcOutput(0, 1, 0) + "<p>" + "<p> 1 0 " + calcOutput(1, 0, 0) + "<p>"  + "<p> 1 1 " + calcOutput(1, 1, 0) + "<p>" + "<p>" + iterations + "</p>";          
-	} else {
-      document.getElementById('test').innerHTML = "DONE!" + "<p> 0 0 " + calcOutput(0, 0, 0) + "<p>" + "<p> 0 1 " + calcOutput(0, 1, 0) + "<p>" + "<p> 1 0 " + calcOutput(1, 0, 0) + "<p>"  + "<p> 1 1 " + calcOutput(1, 1, 0) + "<p>" + "<p>" + iterations + "</p>";
-
-    }
-    
-    
-    
-//Input neurons are just straight up black
-ctx.fillStyle = "black";
-ctx.fillRect(0, 0, 20, 20);
-ctx.fillRect(0, 50, 20, 20);
-
-//Input - hidden weights
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights1[0]);
-ctx.beginPath();
-ctx.moveTo(20, 10);
-ctx.lineTo(60, 10);
-ctx.stroke();
-
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights1[1]);
-ctx.beginPath();
-ctx.moveTo(20, 10);
-ctx.lineTo(60, 60);
-ctx.stroke();
-
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights1[2]);
-ctx.beginPath();
-ctx.moveTo(20, 60);
-ctx.lineTo(60, 60);
-ctx.stroke();
-
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights1[3]);
-ctx.beginPath();
-ctx.moveTo(20, 60);
-ctx.lineTo(60, 10);
-ctx.stroke();
-
-//Hidden neuron biases
-ctx.fillStyle = "#"+rainbow.colourAt(neuralNetworks[0].biases[0]);
-ctx.fillRect(60, 0, 20, 20);
-ctx.fillStyle = "#"+rainbow.colourAt(neuralNetworks[0].biases[1]);
-ctx.fillRect(60, 50, 20, 20);
-
-//Hidden - Output weights
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights2[0]);
-ctx.beginPath();
-ctx.moveTo(80, 35);
-ctx.lineTo(120, 35);
-ctx.stroke();
-
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights2[1]);
-ctx.beginPath();
-ctx.moveTo(80, 35);
-ctx.lineTo(120, 35);
-ctx.stroke();
-
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights2[2]);
-ctx.beginPath();
-ctx.moveTo(80, 35);
-ctx.lineTo(120, 35);
-ctx.stroke();
-
-ctx.strokeStyle = "#"+rainbow.colourAt(neuralNetworks[0].weights2[3]);
-ctx.beginPath();
-ctx.moveTo(80, 35);
-ctx.lineTo(120, 35);
-ctx.stroke();
-
-
-requestAnimationFrame(cycle)
-}     
-
-cycle();
-
-
-
-
+frame();
 </script>
