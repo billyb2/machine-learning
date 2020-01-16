@@ -49,15 +49,15 @@ function Player(player) {
 
 //Ball object-prototype
 //Again, might have powerups or something if I get the basic game done early, might as well make it easy to have multiple balls
-function Ball(ball) {
-	this.x = ball.x;
-	this.y = ball.y;
+function Ball() {
+	this.x = ctx.canvas.width / 2 - 5;
+	this.y = ctx.canvas.height / 2 - 5;
 
-	this.width = ball.width;
-	this.height = ball.height;
+	this.width = 10;
+	this.height = 10;
 
-	this.direction = null;
-	this.speed = ball.speed;
+	this.direction = Math.random() > 0.5 ? "left" : "right";
+	this.speed = 4;
 	this.angle = 0;
 	this.velX = 0;
 	this.velY = 0;
@@ -68,13 +68,41 @@ function Ball(ball) {
 //Please make sure the numberOfNeuralNetworks is even
 function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Length, biases2Length){
 	
-    for(var i = 0; i < numberOfNeuralNetworks/2; i++){
-    	
-    }
+    alert(numberOfNeuralNetworks);
 
 	//Keeps the maximum number of neural networks there should be.
 	maxNumOfNNs = numberOfNeuralNetworks;
 	for (var i = 0; i < numberOfNeuralNetworks; i++) {
+    	if( i % 2 == 0){
+        	//1 ball for every 2 players
+    		balls.push( new Ball() );
+
+			//Half the players on the left, half on the right		
+    		players.push(new Player({
+        		x: 0,
+                y: ctx.canvas.height / 2 - 50,
+                width: 20,
+                height: 100,
+                speed: 8
+
+        
+        	}) );
+            
+        } else {
+        alert(1)
+    		players.push(new Player({
+        		x: ctx.canvas.width - 20,
+                y: ctx.canvas.height / 2 - 50,
+                width: 20,
+                height: 100,
+                speed: 8
+
+        
+        	}) );
+            
+        }
+    
+    
     	var weights1 = [];
         var biases1 = [];
         var weights2 = [];
@@ -118,14 +146,20 @@ function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Len
 	}
 }
 
-init(2, 100, 10, 30, 3);
-
+init(4, 100, 10, 30, 3);
+alert(balls.length);
 
 function frame(){
 	ctx.fillStyle = "black";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     
-    requestAnimationFrame();
+    for(var i = 0; i < players.length; i++){
+    	ctx.fillStyle = "white";
+        ctx.fillRect(players[i].x, players[i].y, players[i].width, players[i].height);
+    }
+    
+    
+    requestAnimationFrame(frame);
 }
 
 frame();
