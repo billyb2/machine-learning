@@ -68,11 +68,12 @@ function Ball() {
 //Please make sure the numberOfNeuralNetworks is even
 function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Length, biases2Length){
 	
-    alert(numberOfNeuralNetworks);
 
 	//Keeps the maximum number of neural networks there should be.
 	maxNumOfNNs = numberOfNeuralNetworks;
 	for (var i = 0; i < numberOfNeuralNetworks; i++) {
+    
+    
     	if( i % 2 == 0){
         	//1 ball for every 2 players
     		balls.push( new Ball() );
@@ -89,7 +90,6 @@ function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Len
         	}) );
             
         } else {
-        alert(1)
     		players.push(new Player({
         		x: ctx.canvas.width - 20,
                 y: ctx.canvas.height / 2 - 50,
@@ -108,23 +108,24 @@ function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Len
         var weights2 = [];
         var biases2 = [];
         
+
         //Automates the process of making random weights and biases
-    	for(var i = 0; i < weights1Length; i ++){
+        
+    	for(var z = 0; z < weights1Length; z ++){
         	weights1.push(getRandomFloat(-maxRandomWeight, maxRandomWeight));
         }
         
-    	for(var i = 0; i < biases1Length; i ++){
+    	for(var a = 0; a < biases1Length; a ++){
         	biases1.push(getRandomFloat(-maxRandomBias, maxRandomBias));
         }
         
-    	for(var i = 0; i < weights2Length; i ++){
+    	for(var b = 0; b < weights2Length; b ++){
         	weights2.push(getRandomFloat(-maxRandomWeight, maxRandomWeight));
         }
         
-    	for(var i = 0; i < biases2Length; i ++){
+    	for(var c = 0; c < biases2Length; c++){
         	biases2.push(getRandomFloat(-maxRandomBias, maxRandomBias));
         }
-        
         
         
         
@@ -147,7 +148,6 @@ function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Len
 }
 
 init(4, 100, 10, 30, 3);
-alert(balls.length);
 
 function frame(){
 	ctx.fillStyle = "black";
