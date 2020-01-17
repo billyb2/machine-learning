@@ -147,6 +147,12 @@ function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Len
 	}
 }
 
+function calcOutput(index){
+	var hn1 = squish((players[index].x * neuralNetworks[index].weights1[0]) + (players[index].y * neuralNetworks[index].weights1[1]) + (players[index].speed * neuralNetworks[index].weights1[2]), 'tanh');
+    return hn1;
+}
+
+
 init(4, 100, 10, 30, 3);
 
 function frame(){
@@ -156,6 +162,11 @@ function frame(){
     for(var i = 0; i < players.length; i++){
     	ctx.fillStyle = "white";
         ctx.fillRect(players[i].x, players[i].y, players[i].width, players[i].height);
+    }
+    
+        for(var i = 0; i < balls.length; i++){
+    	ctx.fillStyle = "white";
+        ctx.fillRect(balls[i].x, balls[i].y, balls[i].width, balls[i].height);
     }
     
     
