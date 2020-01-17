@@ -56,7 +56,7 @@ function Ball() {
 	this.width = 10;
 	this.height = 10;
 
-	this.direction = Math.random() > 0.5 ? "left" : "right";
+	this.direction = Math.random() > 0.5 ? 0 : 1;
 	this.speed = 4;
 	this.angle = 0;
 	this.velX = 0;
@@ -131,7 +131,7 @@ function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Len
         
     
 		neuralNetworks.push({
-			//10 inputs
+			//12 inputs
             
 			//100 weights
 			weights1: weights1,
@@ -153,7 +153,52 @@ function calcOutput(index){
 }
 
 
-init(4, 100, 10, 30, 3);
+init(4, 120, 10, 30, 3);
+
+function calcOutput(i){
+	if (i % 2 == 0){
+    	var hn1 = squish( players[i].x * neuralNetworks[i].weights1[0] + players[i].y * neuralNetworks[i].weights1[1] + players[i].speed * neuralNetworks[i].weights1[2] + players[i + 1].x * neuralNetworks[i].weights1[3] + players[i + 1].y * neuralNetworks[i].weights1[4] + players[i + 1].speed * neuralNetworks[i].weights1[5] + balls[i].x * neuralNetworks[i].weights1[6] + balls[i].y * neuralNetworks[i].weights1[7] + balls[i].angle * neuralNetworks[i].weights1[8] + balls[i].direction * neuralNetworks[i].weights1[9] + balls[i].velX * neuralNetworks[i].weights1[10] + balls[i].velY * neuralNetworks[i].weights1[11] + neuralNetworks[i].biases1[0] , 'tanh');
+        
+    	var hn2 = squish( players[i].x * neuralNetworks[i].weights1[12] + players[i].y * neuralNetworks[i].weights1[13] + players[i].speed * neuralNetworks[i].weights1[14] + players[i + 1].x * neuralNetworks[i].weights1[15] + players[i + 1].y * neuralNetworks[i].weights1[16] + players[i + 1].speed * neuralNetworks[i].weights1[17] + balls[i].x * neuralNetworks[i].weights1[18] + balls[i].y * neuralNetworks[i].weights1[19] + balls[i].angle * neuralNetworks[i].weights1[20] + balls[i].direction * neuralNetworks[i].weights1[21] + balls[i].velX * neuralNetworks[i].weights1[22] + balls[i].velY * neuralNetworks[i].weights1[23] + neuralNetworks[i].biases1[1] , 'tanh');
+        
+    	var hn3 = squish( players[i].x * neuralNetworks[i].weights1[24] + players[i].y * neuralNetworks[i].weights1[25] + players[i].speed * neuralNetworks[i].weights1[26] + players[i + 1].x * neuralNetworks[i].weights1[27] + players[i + 1].y * neuralNetworks[i].weights1[28] + players[i + 1].speed * neuralNetworks[i].weights1[29] + balls[i].x * neuralNetworks[i].weights1[30] + balls[i].y * neuralNetworks[i].weights1[31] + balls[i].angle * neuralNetworks[i].weights1[32] + balls[i].direction * neuralNetworks[i].weights1[33] + balls[i].velX * neuralNetworks[i].weights1[34] + balls[i].velY * neuralNetworks[i].weights1[35] + neuralNetworks[i].biases1[2] , 'tanh');
+        
+        var hn4 = squish( players[i].x * neuralNetworks[i].weights1[36] + players[i].y * neuralNetworks[i].weights1[37] + players[i].speed * neuralNetworks[i].weights1[38] + players[i + 1].x * neuralNetworks[i].weights1[39] + players[i + 1].y * neuralNetworks[i].weights1[40] + players[i + 1].speed * neuralNetworks[i].weights1[41] + balls[i].x * neuralNetworks[i].weights1[42] + balls[i].y * neuralNetworks[i].weights1[43] + balls[i].angle * neuralNetworks[i].weights1[44] + balls[i].direction * neuralNetworks[i].weights1[45] + balls[i].velX * neuralNetworks[i].weights1[46] + balls[i].velY * neuralNetworks[i].weights1[47] + neuralNetworks[i].biases1[3] , 'tanh');
+        
+        var hn5 = squish( players[i].x * neuralNetworks[i].weights1[48] + players[i].y * neuralNetworks[i].weights1[49] + players[i].speed * neuralNetworks[i].weights1[50] + players[i + 1].x * neuralNetworks[i].weights1[51] + players[i + 1].y * neuralNetworks[i].weights1[52] + players[i + 1].speed * neuralNetworks[i].weights1[53] + balls[i].x * neuralNetworks[i].weights1[54] + balls[i].y * neuralNetworks[i].weights1[55] + balls[i].angle * neuralNetworks[i].weights1[56] + balls[i].direction * neuralNetworks[i].weights1[57] + balls[i].velX * neuralNetworks[i].weights1[58] + balls[i].velY * neuralNetworks[i].weights1[59] + neuralNetworks[i].biases1[4] , 'tanh');
+        
+        var hn6 = squish( players[i].x * neuralNetworks[i].weights1[60] + players[i].y * neuralNetworks[i].weights1[61] + players[i].speed * neuralNetworks[i].weights1[62] + players[i + 1].x * neuralNetworks[i].weights1[63] + players[i + 1].y * neuralNetworks[i].weights1[64] + players[i + 1].speed * neuralNetworks[i].weights1[65] + balls[i].x * neuralNetworks[i].weights1[66] + balls[i].y * neuralNetworks[i].weights1[67] + balls[i].angle * neuralNetworks[i].weights1[68] + balls[i].direction * neuralNetworks[i].weights1[69] + balls[i].velX * neuralNetworks[i].weights1[70] + balls[i].velY * neuralNetworks[i].weights1[71] + neuralNetworks[i].biases1[5] , 'tanh');
+        
+        var hn7 = squish( players[i].x * neuralNetworks[i].weights1[72] + players[i].y * neuralNetworks[i].weights1[73] + players[i].speed * neuralNetworks[i].weights1[74] + players[i + 1].x * neuralNetworks[i].weights1[75] + players[i + 1].y * neuralNetworks[i].weights1[76] + players[i + 1].speed * neuralNetworks[i].weights1[77] + balls[i].x * neuralNetworks[i].weights1[78] + balls[i].y * neuralNetworks[i].weights1[79] + balls[i].angle * neuralNetworks[i].weights1[80] + balls[i].direction * neuralNetworks[i].weights1[81] + balls[i].velX * neuralNetworks[i].weights1[82] + balls[i].velY * neuralNetworks[i].weights1[83] + neuralNetworks[i].biases1[6] , 'tanh');
+        
+        var hn8 = squish( players[i].x * neuralNetworks[i].weights1[84] + players[i].y * neuralNetworks[i].weights1[85] + players[i].speed * neuralNetworks[i].weights1[86] + players[i + 1].x * neuralNetworks[i].weights1[87] + players[i + 1].y * neuralNetworks[i].weights1[88] + players[i + 1].speed * neuralNetworks[i].weights1[89] + balls[i].x * neuralNetworks[i].weights1[90] + balls[i].y * neuralNetworks[i].weights1[91] + balls[i].angle * neuralNetworks[i].weights1[92] + balls[i].direction * neuralNetworks[i].weights1[93] + balls[i].velX * neuralNetworks[i].weights1[94] + balls[i].velY * neuralNetworks[i].weights1[95] + neuralNetworks[i].biases1[7] , 'tanh');
+        
+        var hn9 = squish( players[i].x * neuralNetworks[i].weights1[84] + players[i].y * neuralNetworks[i].weights1[85] + players[i].speed * neuralNetworks[i].weights1[86] + players[i + 1].x * neuralNetworks[i].weights1[87] + players[i + 1].y * neuralNetworks[i].weights1[88] + players[i + 1].speed * neuralNetworks[i].weights1[89] + balls[i].x * neuralNetworks[i].weights1[90] + balls[i].y * neuralNetworks[i].weights1[91] + balls[i].angle * neuralNetworks[i].weights1[92] + balls[i].direction * neuralNetworks[i].weights1[93] + balls[i].velX * neuralNetworks[i].weights1[94] + balls[i].velY * neuralNetworks[i].weights1[95] + neuralNetworks[i].biases1[7] , 'tanh');
+        
+        var hn9 = squish( players[i].x * neuralNetworks[i].weights1[96] + players[i].y * neuralNetworks[i].weights1[97] + players[i].speed * neuralNetworks[i].weights1[98] + players[i + 1].x * neuralNetworks[i].weights1[99] + players[i + 1].y * neuralNetworks[i].weights1[100] + players[i + 1].speed * neuralNetworks[i].weights1[101] + balls[i].x * neuralNetworks[i].weights1[102] + balls[i].y * neuralNetworks[i].weights1[103] + balls[i].angle * neuralNetworks[i].weights1[104] + balls[i].direction * neuralNetworks[i].weights1[105] + balls[i].velX * neuralNetworks[i].weights1[106] + balls[i].velY * neuralNetworks[i].weights1[107] + neuralNetworks[i].biases1[8] , 'tanh');
+        
+        var hn10 = squish( players[i].x * neuralNetworks[i].weights1[108] + players[i].y * neuralNetworks[i].weights1[109] + players[i].speed * neuralNetworks[i].weights1[110] + players[i + 1].x * neuralNetworks[i].weights1[111] + players[i + 1].y * neuralNetworks[i].weights1[112] + players[i + 1].speed * neuralNetworks[i].weights1[113] + balls[i].x * neuralNetworks[i].weights1[114] + balls[i].y * neuralNetworks[i].weights1[115] + balls[i].angle * neuralNetworks[i].weights1[116] + balls[i].direction * neuralNetworks[i].weights1[117] + balls[i].velX * neuralNetworks[i].weights1[118] + balls[i].velY * neuralNetworks[i].weights1[119] + neuralNetworks[i].biases1[9] , 'tanh');
+
+    }
+    
+    var output1 = squish(hn1 * neuralNetworks[i].weights2[0] + hn2 * neuralNetworks[i].weights2[1] + hn3 * neuralNetworks[i].weights2[2] + hn4 * neuralNetworks[i].weights2[3] + hn5 * neuralNetworks[i].weights2[4] + hn6 * neuralNetworks[i].weights2[5] + hn7 * neuralNetworks[i].weights2[6] + hn8 * neuralNetworks[i].weights2[7] + hn9 * neuralNetworks[i].weights2[8] + hn10 * neuralNetworks[i].weights2[9] + neuralNetworks[i].biases2[0], 'tanh');
+    
+    var output2 = squish(hn1 * neuralNetworks[i].weights2[10] + hn2 * neuralNetworks[i].weights2[11] + hn3 * neuralNetworks[i].weights2[12] + hn4 * neuralNetworks[i].weights2[13] + hn5 * neuralNetworks[i].weights2[14] + hn6 * neuralNetworks[i].weights2[15] + hn7 * neuralNetworks[i].weights2[16] + hn8 * neuralNetworks[i].weights2[17] + hn9 * neuralNetworks[i].weights2[18] + hn10 * neuralNetworks[i].weights2[19] + neuralNetworks[i].biases2[1], 'tanh');
+    
+    var output3 = squish(hn1 * neuralNetworks[i].weights2[20] + hn2 * neuralNetworks[i].weights2[21] + hn3 * neuralNetworks[i].weights2[22] + hn4 * neuralNetworks[i].weights2[23] + hn5 * neuralNetworks[i].weights2[24] + hn6 * neuralNetworks[i].weights2[25] + hn7 * neuralNetworks[i].weights2[26] + hn8 * neuralNetworks[i].weights2[27] + hn9 * neuralNetworks[i].weights2[28] + hn10 * neuralNetworks[i].weights2[29] + neuralNetworks[i].biases2[2], 'tanh');
+    
+    //Put the outputs in an array
+    var outputs = [output1, output2, output3];
+
+
+    
+    
+    
+	return outputs
+
+}
+
+
 
 function frame(){
 	ctx.fillStyle = "black";
