@@ -255,15 +255,35 @@ function frame(){
         }
         
         
-        
 //Ball collision against top and bottom wall
 		if (balls[Math.floor(i/2)].y <= 0 || balls[Math.floor(i/2)].y + balls[Math.floor(i/2)].height >= ctx.canvas.height) {
 			balls[Math.floor(i/2)].velY = -balls[Math.floor(i/2)].velY;
 		}
         
-        
+        if(i % 2== 0){
 //Against player paddles
 		if (balls[Math.floor(i/2)].x <= players[i].x + players[i].width && balls[Math.floor(i/2)].y + balls[Math.floor(i/2)].height >= players[i].y && balls[Math.floor(i/2)].y <= players[i].y + players[i].height) {
+			balls[Math.floor(i/2)].angle = players[i].y + players[i].height / 2 - balls[Math.floor(i/2)].y
+
+			if (balls[Math.floor(i/2)].velX > 0) {
+				if (balls[Math.floor(i/2)].velX < 20) {
+					balls[Math.floor(i/2)].velX++;
+				}
+			} else {
+				if (balls[Math.floor(i/2)].velX > -20) {
+					balls[Math.floor(i/2)].velX--;
+				}
+			}
+
+			balls[Math.floor(i/2)].velX = -balls[Math.floor(i/2)].velX;
+            if(players[i].speed < 7.5){
+				players[i].speed += 0.5;
+            }
+		}
+
+} else {
+//Against player paddles
+		if (balls[Math.floor(i/2)].x >= players[i].x && balls[Math.floor(i/2)].y + balls[Math.floor(i/2)].height >= players[i].y && balls[Math.floor(i/2)].y <= players[i].y + players[i].height) {
 			balls[Math.floor(i/2)].angle = players[i].y + players[i].height / 2 - balls[Math.floor(i/2)].y
 
 			if (balls[Math.floor(i/2)].velX > 0) {
@@ -280,6 +300,7 @@ function frame(){
 			//players[i].speed += 0.5;
 		}
 
+}
 
         
 //Ball movement
