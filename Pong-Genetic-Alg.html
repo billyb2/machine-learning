@@ -1,353 +1,712 @@
+<!DOCTYPE html>
+
+<h1 id="loading">Loading</h1>
 <canvas id="canvas"></canvas>
-
+<style>
+  canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 740;
+  }
+</style>
 <script>
+
+document.body.style.backgroundColor = "black";
+
 var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext('2d');
+var ctx = canvas.getContext("2d");
 
-ctx.canvas.width = 650;
-ctx.canvas.height = 500;
+ctx.canvas.width = 910;
+ctx.canvas.height = 480;
 
-
-var neuralNetworks = [];
-var players = [];
-var balls = [];
-
-var maxRandomWeight = 7;
-var maxRandomBias = 7;
-
-var maxNumOfNNs = 0;
-
-function squish(input, method) {
-	if(method == "sigmoid"){
-		return 1 / (1 + Math.exp(-input));
-    } else if (method == "tanh"){
-    	return Math.tanh(input)
-    }
-}
-
-
-//Just gives a random floating point number 
-function getRandomFloat(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-//Sets up player object-prototype
-//Would normally just setup 2 players, but might add 4 player support
+//player variables
 function Player(player) {
 	this.x = player.x;
-	this.y = player.y
-
+	this.y = player.y;
 	this.width = player.width;
 	this.height = player.height;
-
+	this.velX = player.velX;
+	this.velY = player.velY;
+	this.facing = player.facing;
+	this.gun = player.gun;
+	this.roomX = player.roomX;
+	this.roomY = player.roomY;
+	this.jumpPower = player.jumpPower;
+	this.jumped = false;
+	this.doubleJumped = false;
+	this.state = "standing";
 	this.speed = player.speed;
-
-	this.score = 0;
-
+	this.canShoot = true;
+	this.canSwitchWeapons = true;
+	this.color = player.color;
+	this.offsetX = player.offsetX;
+	this.offsetY = player.offsetY;
+	this.class = player.class;
 }
 
+var player1 = new Player({
+	x: ctx.canvas.width / 2 - 25,
+	y: ctx.canvas.height / 2 + 50,
+	width: 25,
+	height: 50,
+	velX: 0,
+	velY: 0,
+	facing: "right",
+	gun: "pistol",
+	roomX: 0,
+	roomY: 0,
+	jumpPower: 12,
+	speed: 8,
+	color: "red",
+	offsetX: -170,
+	offsetY: -9000,
+	class: "soldier"
+});
 
-//Ball object-prototype
-//Again, might have powerups or something if I get the basic game done early, might as well make it easy to have multiple balls
-function Ball() {
-	this.x = ctx.canvas.width / 2 - 5;
-	this.y = ctx.canvas.height / 2 - 5;
+var numOfPlatforms = 2;
+var platformsAdded = 0;
 
-	this.width = 10;
-	this.height = 10;
+//Number of images loaded, for later
+var imagesLoaded = 0;
+var maxImages = 0;
 
-	this.direction = Math.random() > 0.5 ? 0 : 1;
-	this.speed = 4;
-	this.angle = 0;
-	this.velX = this.speed;
-	this.velY = this.speed;
+var debugging = true;
 
+//World values
+//Lower friction value = more friction. It's confusing
+var friction = 0.8;
+//Lower gravity is self explanatory
+var gravity = 0.85;
+
+//https://gamedev.stackexchange.com/questions/49251/javascript-create-a-new-bullet-instance-every-time-a-user-event-is-triggered
+var bullets = [];
+var platforms = [];
+
+var keys = [];
+
+var map = "map1";
+
+var map1 = [{
+		name: "skyscraper",
+		background: "#0064ab",
+		width: 10000,
+		height: 10000
+	},
+	{
+		wallX: 800,
+		wallY: 9915,
+		wallWidth: 200,
+		wallHeight: 90,
+		color: "green",
+		durability: 5
+	},
+	{
+		wallX: 1000,
+		wallY: 9810,
+		wallWidth: 50,
+		wallHeight: 150,
+		color: "red",
+		durability: 5
+	}
+];
+
+function drawStandingPlayer(player) {
+	if (player.class == "soldier") {
+		ctx.fillStyle = player.color;
+		ctx.fillRect(
+			player.x - player.offsetX,
+			player.y - player.offsetY,
+			player.width,
+			player.height
+		);
+
+	}
 }
 
-//Initializes the arrays above
-//Please make sure the numberOfNeuralNetworks is even
-function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Length, biases2Length){
-	
+function drawCrouchingPlayer(player) {
+	if (player.class == "soldier") {
+		ctx.fillStyle = player.color;
+		ctx.fillRect(
+			player.x - player.offsetX,
+			player.y - player.offsetY,
+			player.width,
+			player.height / 2
+		);
 
-	//Keeps the maximum number of neural networks there should be.
-	maxNumOfNNs = numberOfNeuralNetworks;
-	for (var i = 0; i < numberOfNeuralNetworks; i++) {
-    
-    
-    	if( i % 2 == 0){
-        	//1 ball for every 2 players
-    		balls.push( new Ball() );
-
-			//Half the players on the left, half on the right		
-    		players.push(new Player({
-        		x: 0,
-                y: ctx.canvas.height / 2 - 50,
-                width: 20,
-                height: 100,
-                speed: 8
-
-        
-        	}) );
-            
-        } else {
-    		players.push(new Player({
-        		x: ctx.canvas.width - 20,
-                y: ctx.canvas.height / 2 - 50,
-                width: 20,
-                height: 100,
-                speed: 8
-
-        
-        	}) );
-            
-        }
-    
-    
-    	var weights1 = [];
-        var biases1 = [];
-        var weights2 = [];
-        var biases2 = [];
-        
-
-        //Automates the process of making random weights and biases
-        
-    	for(var z = 0; z < weights1Length; z ++){
-        	weights1.push(getRandomFloat(-maxRandomWeight, maxRandomWeight));
-        }
-        
-    	for(var a = 0; a < biases1Length; a ++){
-        	biases1.push(getRandomFloat(-maxRandomBias, maxRandomBias));
-        }
-        
-    	for(var b = 0; b < weights2Length; b ++){
-        	weights2.push(getRandomFloat(-maxRandomWeight, maxRandomWeight));
-        }
-        
-    	for(var c = 0; c < biases2Length; c++){
-        	biases2.push(getRandomFloat(-maxRandomBias, maxRandomBias));
-        }
-        
-        
-        
-    
-		neuralNetworks.push({
-			//12 inputs
-            
-			//100 weights
-			weights1: weights1,
-			//10 biases
-			biases1: biases1,
-			//30 weights
-			weights2: weights2,
-            //3 output biases
-            biases2: biases2
-
-			//3 output
-		});
 	}
 }
 
 
-init(2, 120, 10, 30, 3);
 
-function calcOutput(i){
-	if (i % 2 == 0){
+function Guard(x, y, color) {
+	var guardVelY = 0;
+	var guardJumped = false;
+	var guardJumping = false;
+	var direction = 0;
+	this.x = x;
+	this.y = y;
+	this.color = color;
+	var jumps = 0;
 
-
-var hn1 = squish( players[i].x * neuralNetworks[i].weights1[0] + players[i].y * neuralNetworks[i].weights1[1] + players[i].speed * neuralNetworks[i].weights1[2] + players[i + 1].x * neuralNetworks[i].weights1[3] + players[i + 1].y * neuralNetworks[i].weights1[4] + players[i + 1].speed * neuralNetworks[i].weights1[5] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[6] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[7] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[8] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[9] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[10] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[11] + neuralNetworks[i].biases1[0] , 'tanh');
-        
-    	var hn2 = squish( players[i].x * neuralNetworks[i].weights1[12] + players[i].y * neuralNetworks[i].weights1[13] + players[i].speed * neuralNetworks[i].weights1[14] + players[i + 1].x * neuralNetworks[i].weights1[15] + players[i + 1].y * neuralNetworks[i].weights1[16] + players[i + 1].speed * neuralNetworks[i].weights1[17] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[18] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[19] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[20] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[21] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[22] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[23] + neuralNetworks[i].biases1[1] , 'tanh');
-        
-    	var hn3 = squish( players[i].x * neuralNetworks[i].weights1[24] + players[i].y * neuralNetworks[i].weights1[25] + players[i].speed * neuralNetworks[i].weights1[26] + players[i + 1].x * neuralNetworks[i].weights1[27] + players[i + 1].y * neuralNetworks[i].weights1[28] + players[i + 1].speed * neuralNetworks[i].weights1[29] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[30] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[31] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[32] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[33] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[34] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[35] + neuralNetworks[i].biases1[2] , 'tanh');
-        
-        var hn4 = squish( players[i].x * neuralNetworks[i].weights1[36] + players[i].y * neuralNetworks[i].weights1[37] + players[i].speed * neuralNetworks[i].weights1[38] + players[i + 1].x * neuralNetworks[i].weights1[39] + players[i + 1].y * neuralNetworks[i].weights1[40] + players[i + 1].speed * neuralNetworks[i].weights1[41] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[42] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[43] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[44] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[45] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[46] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[47] + neuralNetworks[i].biases1[3] , 'tanh');
-        
-        var hn5 = squish( players[i].x * neuralNetworks[i].weights1[48] + players[i].y * neuralNetworks[i].weights1[49] + players[i].speed * neuralNetworks[i].weights1[50] + players[i + 1].x * neuralNetworks[i].weights1[51] + players[i + 1].y * neuralNetworks[i].weights1[52] + players[i + 1].speed * neuralNetworks[i].weights1[53] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[54] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[55] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[56] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[57] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[58] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[59] + neuralNetworks[i].biases1[4] , 'tanh');
-        
-        var hn6 = squish( players[i].x * neuralNetworks[i].weights1[60] + players[i].y * neuralNetworks[i].weights1[61] + players[i].speed * neuralNetworks[i].weights1[62] + players[i + 1].x * neuralNetworks[i].weights1[63] + players[i + 1].y * neuralNetworks[i].weights1[64] + players[i + 1].speed * neuralNetworks[i].weights1[65] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[66] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[67] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[68] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[69] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[70] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[71] + neuralNetworks[i].biases1[5] , 'tanh');
-        
-        var hn7 = squish( players[i].x * neuralNetworks[i].weights1[72] + players[i].y * neuralNetworks[i].weights1[73] + players[i].speed * neuralNetworks[i].weights1[74] + players[i + 1].x * neuralNetworks[i].weights1[75] + players[i + 1].y * neuralNetworks[i].weights1[76] + players[i + 1].speed * neuralNetworks[i].weights1[77] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[78] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[79] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[80] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[81] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[82] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[83] + neuralNetworks[i].biases1[6] , 'tanh');
-        
-        var hn8 = squish( players[i].x * neuralNetworks[i].weights1[84] + players[i].y * neuralNetworks[i].weights1[85] + players[i].speed * neuralNetworks[i].weights1[86] + players[i + 1].x * neuralNetworks[i].weights1[87] + players[i + 1].y * neuralNetworks[i].weights1[88] + players[i + 1].speed * neuralNetworks[i].weights1[89] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[90] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[91] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[92] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[93] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[94] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[95] + neuralNetworks[i].biases1[7] , 'tanh');
-        
-        var hn9 = squish( players[i].x * neuralNetworks[i].weights1[84] + players[i].y * neuralNetworks[i].weights1[85] + players[i].speed * neuralNetworks[i].weights1[86] + players[i + 1].x * neuralNetworks[i].weights1[87] + players[i + 1].y * neuralNetworks[i].weights1[88] + players[i + 1].speed * neuralNetworks[i].weights1[89] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[90] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[91] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[92] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[93] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[94] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[95] + neuralNetworks[i].biases1[7] , 'tanh');
-        
-        var hn9 = squish( players[i].x * neuralNetworks[i].weights1[96] + players[i].y * neuralNetworks[i].weights1[97] + players[i].speed * neuralNetworks[i].weights1[98] + players[i + 1].x * neuralNetworks[i].weights1[99] + players[i + 1].y * neuralNetworks[i].weights1[100] + players[i + 1].speed * neuralNetworks[i].weights1[101] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[102] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[103] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[104] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[105] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[106] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[107] + neuralNetworks[i].biases1[8] , 'tanh');
-        
-        var hn10 = squish( players[i].x * neuralNetworks[i].weights1[108] + players[i].y * neuralNetworks[i].weights1[109] + players[i].speed * neuralNetworks[i].weights1[110] + players[i + 1].x * neuralNetworks[i].weights1[111] + players[i + 1].y * neuralNetworks[i].weights1[112] + players[i + 1].speed * neuralNetworks[i].weights1[113] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[114] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[115] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[116] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[117] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[118] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[119] + neuralNetworks[i].biases1[9] , 'tanh');
-        
-    } else {
-    
-var hn1 = squish( players[i].x * neuralNetworks[i].weights1[0] + players[i].y * neuralNetworks[i].weights1[1] + players[i].speed * neuralNetworks[i].weights1[2] + players[i - 1].x * neuralNetworks[i].weights1[3] + players[i - 1].y * neuralNetworks[i].weights1[4] + players[i - 1].speed * neuralNetworks[i].weights1[5] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[6] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[7] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[8] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[9] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[10] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[11] + neuralNetworks[i].biases1[0] , 'tanh');
-        
-    	var hn2 = squish( players[i].x * neuralNetworks[i].weights1[12] + players[i].y * neuralNetworks[i].weights1[13] + players[i].speed * neuralNetworks[i].weights1[14] + players[i - 1].x * neuralNetworks[i].weights1[15] + players[i - 1].y * neuralNetworks[i].weights1[16] + players[i - 1].speed * neuralNetworks[i].weights1[17] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[18] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[19] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[20] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[21] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[22] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[23] + neuralNetworks[i].biases1[1] , 'tanh');
-        
-    	var hn3 = squish( players[i].x * neuralNetworks[i].weights1[24] + players[i].y * neuralNetworks[i].weights1[25] + players[i].speed * neuralNetworks[i].weights1[26] + players[i - 1].x * neuralNetworks[i].weights1[27] + players[i - 1].y * neuralNetworks[i].weights1[28] + players[i - 1].speed * neuralNetworks[i].weights1[29] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[30] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[31] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[32] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[33] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[34] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[35] + neuralNetworks[i].biases1[2] , 'tanh');
-        
-        var hn4 = squish( players[i].x * neuralNetworks[i].weights1[36] + players[i].y * neuralNetworks[i].weights1[37] + players[i].speed * neuralNetworks[i].weights1[38] + players[i - 1].x * neuralNetworks[i].weights1[39] + players[i - 1].y * neuralNetworks[i].weights1[40] + players[i - 1].speed * neuralNetworks[i].weights1[41] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[42] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[43] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[44] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[45] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[46] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[47] + neuralNetworks[i].biases1[3] , 'tanh');
-        
-        var hn5 = squish( players[i].x * neuralNetworks[i].weights1[48] + players[i].y * neuralNetworks[i].weights1[49] + players[i].speed * neuralNetworks[i].weights1[50] + players[i - 1].x * neuralNetworks[i].weights1[51] + players[i - 1].y * neuralNetworks[i].weights1[52] + players[i - 1].speed * neuralNetworks[i].weights1[53] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[54] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[55] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[56] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[57] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[58] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[59] + neuralNetworks[i].biases1[4] , 'tanh');
-        
-        var hn6 = squish( players[i].x * neuralNetworks[i].weights1[60] + players[i].y * neuralNetworks[i].weights1[61] + players[i].speed * neuralNetworks[i].weights1[62] + players[i - 1].x * neuralNetworks[i].weights1[63] + players[i - 1].y * neuralNetworks[i].weights1[64] + players[i - 1].speed * neuralNetworks[i].weights1[65] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[66] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[67] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[68] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[69] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[70] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[71] + neuralNetworks[i].biases1[5] , 'tanh');
-        
-        var hn7 = squish( players[i].x * neuralNetworks[i].weights1[72] + players[i].y * neuralNetworks[i].weights1[73] + players[i].speed * neuralNetworks[i].weights1[74] + players[i - 1].x * neuralNetworks[i].weights1[75] + players[i - 1].y * neuralNetworks[i].weights1[76] + players[i - 1].speed * neuralNetworks[i].weights1[77] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[78] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[79] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[80] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[81] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[82] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[83] + neuralNetworks[i].biases1[6] , 'tanh');
-        
-        var hn8 = squish( players[i].x * neuralNetworks[i].weights1[84] + players[i].y * neuralNetworks[i].weights1[85] + players[i].speed * neuralNetworks[i].weights1[86] + players[i - 1].x * neuralNetworks[i].weights1[87] + players[i - 1].y * neuralNetworks[i].weights1[88] + players[i - 1].speed * neuralNetworks[i].weights1[89] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[90] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[91] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[92] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[93] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[94] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[95] + neuralNetworks[i].biases1[7] , 'tanh');
-        
-        var hn9 = squish( players[i].x * neuralNetworks[i].weights1[84] + players[i].y * neuralNetworks[i].weights1[85] + players[i].speed * neuralNetworks[i].weights1[86] + players[i - 1].x * neuralNetworks[i].weights1[87] + players[i - 1].y * neuralNetworks[i].weights1[88] + players[i - 1].speed * neuralNetworks[i].weights1[89] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[90] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[91] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[92] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[93] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[94] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[95] + neuralNetworks[i].biases1[7] , 'tanh');
-        
-        var hn9 = squish( players[i].x * neuralNetworks[i].weights1[96] + players[i].y * neuralNetworks[i].weights1[97] + players[i].speed * neuralNetworks[i].weights1[98] + players[i - 1].x * neuralNetworks[i].weights1[99] + players[i - 1].y * neuralNetworks[i].weights1[100] + players[i - 1].speed * neuralNetworks[i].weights1[101] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[102] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[103] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[104] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[105] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[106] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[107] + neuralNetworks[i].biases1[8] , 'tanh');
-        
-        var hn10 = squish( players[i].x * neuralNetworks[i].weights1[108] + players[i].y * neuralNetworks[i].weights1[109] + players[i].speed * neuralNetworks[i].weights1[110] + players[i - 1].x * neuralNetworks[i].weights1[111] + players[i - 1].y * neuralNetworks[i].weights1[112] + players[i - 1].speed * neuralNetworks[i].weights1[113] + balls[Math.floor(i/2)].x * neuralNetworks[i].weights1[114] + balls[Math.floor(i/2)].y * neuralNetworks[i].weights1[115] + balls[Math.floor(i/2)].angle * neuralNetworks[i].weights1[116] + balls[Math.floor(i/2)].direction * neuralNetworks[i].weights1[117] + balls[Math.floor(i/2)].velX * neuralNetworks[i].weights1[118] + balls[Math.floor(i/2)].velY * neuralNetworks[i].weights1[119] + neuralNetworks[i].biases1[9] , 'tanh');
-        
-    }
-    
-    var output1 = squish(hn1 * neuralNetworks[i].weights2[0] + hn2 * neuralNetworks[i].weights2[1] + hn3 * neuralNetworks[i].weights2[2] + hn4 * neuralNetworks[i].weights2[3] + hn5 * neuralNetworks[i].weights2[4] + hn6 * neuralNetworks[i].weights2[5] + hn7 * neuralNetworks[i].weights2[6] + hn8 * neuralNetworks[i].weights2[7] + hn9 * neuralNetworks[i].weights2[8] + hn10 * neuralNetworks[i].weights2[9] + neuralNetworks[i].biases2[0], 'tanh');
-    
-    var output2 = squish(hn1 * neuralNetworks[i].weights2[10] + hn2 * neuralNetworks[i].weights2[11] + hn3 * neuralNetworks[i].weights2[12] + hn4 * neuralNetworks[i].weights2[13] + hn5 * neuralNetworks[i].weights2[14] + hn6 * neuralNetworks[i].weights2[15] + hn7 * neuralNetworks[i].weights2[16] + hn8 * neuralNetworks[i].weights2[17] + hn9 * neuralNetworks[i].weights2[18] + hn10 * neuralNetworks[i].weights2[19] + neuralNetworks[i].biases2[1], 'tanh');
-    
-    var output3 = squish(hn1 * neuralNetworks[i].weights2[20] + hn2 * neuralNetworks[i].weights2[21] + hn3 * neuralNetworks[i].weights2[22] + hn4 * neuralNetworks[i].weights2[23] + hn5 * neuralNetworks[i].weights2[24] + hn6 * neuralNetworks[i].weights2[25] + hn7 * neuralNetworks[i].weights2[26] + hn8 * neuralNetworks[i].weights2[27] + hn9 * neuralNetworks[i].weights2[28] + hn10 * neuralNetworks[i].weights2[29] + neuralNetworks[i].biases2[2], 'tanh');
-    
-    //Put the outputs in an array
-    var outputs = [output1, output2, output3];
-
-
-    
-    
-    
-	return outputs;
-
-}
-
-function indexOfMax(arr) {
-    if (arr.length === 0) {
-        return -1;
-    }
-
-    var max = arr[0];
-    var maxIndex = 0;
-
-    for (var i = 1; i < arr.length; i++) {
-        if (arr[i] > max) {
-            maxIndex = i;
-            max = arr[i];
-        }
-    }
-
-    return maxIndex;
-}
-
-function frame(){
-	ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
-    for(var i = 0; i < players.length; i++){
-    	ctx.fillStyle = "white";
-        ctx.fillRect(players[i].x, players[i].y, players[i].width, players[i].height);
-        
-        var outputs = calcOutput(i);
-        
-        //Moves the players
-        if(indexOfMax(outputs) == 0){
-        	if(players[i].y >= 0){
-        		players[i].y -= players[i].speed;
-            }
-        } else if(indexOfMax(outputs) == 1){
-        	if(players[i].y + players[i].height <= ctx.canvas.height){
-        		players[i].y += players[i].speed;
-            }
-        }
-        
-        
-//Ball collision against top and bottom wall
-		if (balls[Math.floor(i/2)].y <= 0 || balls[Math.floor(i/2)].y + balls[Math.floor(i/2)].height >= ctx.canvas.height) {
-			balls[Math.floor(i/2)].velY = -balls[Math.floor(i/2)].velY;
+	//lvl = level, like the level the player is on. Pretty much so the guard doesn't just move through stuff
+	this.gravity = function(lvl) {
+		//If the guard isn't being stopped by any platforms, fall
+		if (this.y > ctx.canvas.height - 50) {
+			this.y = ctx.canvas.height - 50;
+			guardVelY = 0;
+			guardJumped = false;
+		} else if (guardVelY <= 35.6) {
+			this.y += guardVelY;
+			guardVelY += gravity;
 		}
-        
-        if(i % 2== 0){
-//Against player paddles
-		if (balls[Math.floor(i/2)].x <= players[i].x + players[i].width && balls[Math.floor(i/2)].y + balls[Math.floor(i/2)].height >= players[i].y && balls[Math.floor(i/2)].y <= players[i].y + players[i].height) {
-			balls[Math.floor(i/2)].angle = players[i].y + players[i].height / 2 - balls[Math.floor(i/2)].y
+	};
 
-			if (balls[Math.floor(i/2)].velX > 0) {
-				if (balls[Math.floor(i/2)].velX < 20) {
-					balls[Math.floor(i/2)].velX++;
-				}
+	this.moveRight = function(maxRight) {
+		if (this.x < maxRight) {
+			this.x += 5;
+			ctx.fillStyle = this.color;
+			ctx.fillRect(this.x, this.y, 25, 50);
+		}
+	};
+
+	this.moveLeft = function(maxLeft) {
+		if (this.x > maxLeft) {
+			this.x -= 5;
+			ctx.fillStyle = this.color;
+			ctx.fillRect(this.x, this.y, 25, 50);
+		}
+	};
+
+	this.jump = function(numOfJumps) {
+		var maxJumps = numOfJumps;
+
+		for (var i = 0; i < maxJumps; i++) {
+			if (guardJumped == false) {
+				guardVelY = -player1.jumpPower * 2;
+				guardJumped = true;
+			}
+		}
+	};
+
+	this.patrol = function() {
+		if (direction == 0) {
+			if (this.x <= ctx.canvas.width / 2) {
+				this.moveRight(ctx.canvas.width / 2);
 			} else {
-				if (balls[Math.floor(i/2)].velX > -20) {
-					balls[Math.floor(i/2)].velX--;
-				}
+				direction = 1;
+			}
+		} else if (direction == 1) {
+			if (this.x > 0) {
+				this.moveLeft(0);
+			} else {
+				direction = 0;
+			}
+		}
+	};
+
+	this.regularGuard = function() {
+		//I SUMMON GRAVIITYYYYY
+		this.gravity();
+		//Move left and right
+
+		this.patrol();
+		ctx.fillStyle = this.color;
+		ctx.fillRect(this.x, this.y, 25, 50);
+	};
+}
+
+var coolGuard = new Guard(50, ctx.canvas.height - 50, "green");
+
+//Still tryna figure out bullets
+//Using jkface's method
+
+function Bullet(bullet, player) {
+	//Gonna uese an object prototype
+	this.active = true;
+	this.color = "white";
+	this.xVel = bullet.vel;
+	this.yVel = bullet.vel;
+	this.width = bullet.width;
+	this.height = bullet.height;
+	this.x = bullet.x;
+	this.y = bullet.y;
+	this.angle = bullet.angle;
+	this.direction = player.facing;
+	this.power = bullet.power;
+	this.damage = bullet.damage;
+}
+
+Bullet.prototype.update = function() {
+	if (this.active == true) {
+		if (map == "map1") {
+			if (this.x + this.width >= map1[0].width) {
+				this.active = false;
+			} else if (this.x <= 0) {
+				this.active = false;
+			} else if (this.y + this.height >= map1[0].height) {
+				this.active = false;
+			} else if (this.y <= 0) {
+				this.active = false;
 			}
 
-			balls[Math.floor(i/2)].velX = -balls[Math.floor(i/2)].velX;
-            if(players[i].speed < 7.5){
-				players[i].speed += 0.5;
-            }
+			for (var i = 1; i < map1.length; i++) {
+				//Bullet-wall collision
+				//Curently uses a rectangle-rectangle collision algorithm. In the future, should upgrade to Sepearting Axis Theorem
+
+				var x = map1[i].wallX;
+				var y = map1[i].wallY;
+				var width = map1[i].wallWidth;
+				var height = map1[i].wallHeight;
+
+				if (this.x + this.width + this.xVel >= x && this.y + this.height >= y && this.y - this.yVel <= y + height && this.x - this.xVel <= x + width) {
+					this.active = false;
+				}
+
+			}
 		}
 
-} else {
-//Against player paddles
-		if (balls[Math.floor(i/2)].x >= players[i].x && balls[Math.floor(i/2)].y + balls[Math.floor(i/2)].height >= players[i].y && balls[Math.floor(i/2)].y <= players[i].y + players[i].height) {
-			balls[Math.floor(i/2)].angle = players[i].y + players[i].height / 2 - balls[Math.floor(i/2)].y
+		if (this.direction == "right") {
+			this.x += this.xVel * Math.cos((this.angle * Math.PI) / 180);
+			this.y += this.yVel * Math.sin((this.angle * Math.PI) / 180);
+		} else if (this.direction == "left") {
+			this.x -= this.xVel * Math.cos((this.angle * Math.PI) / 180);
+			this.y -= this.yVel * Math.sin((this.angle * Math.PI) / 180);
+		}
+		// Store the current context state (i.e. rotation, translation etc..)
+		ctx.save();
 
-			if (balls[Math.floor(i/2)].velX > 0) {
-				if (balls[Math.floor(i/2)].velX < 20) {
-					//balls[Math.floor(i/2)].velX++;
-				}
-			} else {
-				if (balls[Math.floor(i/2)].velX > -20) {
-					//balls[Math.floor(i/2)].velX--;
+		//Convert degrees to radian
+		var rad = (this.angle * Math.PI) / 180;
+
+		//Set the origin to the center of the image
+		ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+
+		//Rotate the canvas around the origin
+		ctx.rotate(rad);
+
+		//draw the image
+		ctx.fillStyle = this.color;
+		ctx.fillRect(
+			(this.width / 2) * -1,
+			(this.height / 2) * -1,
+			this.width,
+			this.height
+		);
+
+		// Restore canvas state as saved from above
+		ctx.restore();
+
+		//if(this.x >= ctx.canvas.width || this.x <= 0 || this.y >= ctx.canvas.height || this.y < 0){
+		//	this.active = false;
+		//}
+	}
+};
+
+//Cryptographically secure random numbers, 'borrowed' from
+//https://stackoverflow.com/questions/18230217/javascript-generate-a-random-number-within-a-range-using-crypto-getrandomvalues
+function getRandomInt(min, max) {
+	// Create byte array and fill with 1 random number
+	var byteArray = new Uint8Array(1);
+	window.crypto.getRandomValues(byteArray);
+
+	var range = max - min + 1;
+	var max_range = 256;
+	if (byteArray[0] >= Math.floor(max_range / range) * range)
+		return getRandomInt(min, max);
+	return min + (byteArray[0] % range);
+}
+
+function drawGun(player) {
+	if (player.gun == "pistol") {
+		bullets.push(
+			new Bullet({
+					vel: 25,
+					x: player.x - player.offsetX + player.width,
+					y: player.y - player.offsetY+ player.height / 2,
+					width: 12,
+					height: 4,
+					angle: getRandomInt(-6, 6),
+					power: 3,
+					damage: Math.floor(Math.random() * 33) + 26
+				},
+				player
+			)
+		);
+	} else if (player.gun == "sniper") {
+		bullets.push(
+			new Bullet({
+					vel: 100,
+					x: player.x - player.offsetX + player.width,
+					y: player.y - player.offsetY + player.height / 2,
+					width: 25,
+					height: 4,
+					angle: Math.floor(Math.random() * (3 - -3)) - 3,
+					power: 9,
+					damage: Math.floor(Math.random() * 150) + 146
+				},
+				player
+			)
+		);
+	} else if (player.gun == "machinegun") {
+		bullets.push(
+			new Bullet({
+					vel: 25,
+					x: player.x - player.offsetX + player.width,
+					y: player.y - player.offsetY + player.height / 2,
+					width: 10,
+					height: 4,
+					//Random angle up to 45 degrees
+					angle: getRandomInt(-20, 20),
+					power: 4,
+					damage: getRandomInt(28, 35)
+				},
+				player
+			)
+		);
+		bullets.push(
+			new Bullet({
+					vel: 25,
+					x: player.x - player.offsetX + player.width,
+					y: player.y - player.offsetY + player.height / 2,
+					width: 10,
+					height: 4,
+					angle: getRandomInt(-20, 20),
+					power: 4,
+					damage: getRandomInt(28, 35)
+				},
+				player
+			)
+		);
+	} else if (player.gun == "m4") {
+		if (player.facing == "right") {
+			bullets.push(
+				new Bullet({
+						vel: 35,
+						x: player.x - player.offsetX + player.width,
+						y: player.y - player.offsetY + player.height / 2,
+						width: 15,
+						height: 5,
+						angle: getRandomInt(-8, 8),
+						power: 5,
+						damage: getRandomInt(49, 68)
+					},
+					player
+				)
+			);
+		} else if (player.facing == "left") {
+			bullets.push(
+				new Bullet({
+						vel: 35,
+						x: player.x - player.offsetX,
+						y: player.y - player.offsetY + player.height / 2,
+						width: 15,
+						height: 5,
+						angle: getRandomInt(-8, 8),
+						power: 5,
+						damage: getRandomInt(49, 68)
+					},
+					player
+				)
+			);
+		}
+	}
+
+
+	player.canShoot = false;
+}
+
+function randomNumber(maxNum, minNum) {
+	return Math.floor(Math.random * maxNum) + minNum;
+}
+
+function frame() {
+	window.scrollTo(0, 0);
+	ctx.save();
+	ctx.translate(player1.offsetX, player1.offsetY);
+
+	//Stuff is done loading!
+	document.getElementById("loading").innerHTML = "";
+	//Clears the screen
+	ctx.fillStyle = map1[0].background;
+	ctx.fillRect(
+		-player1.offsetX,
+		-player1.offsetY,
+		ctx.canvas.width,
+		ctx.canvas.height
+	);
+
+	//Draw the map
+	//0th index is used for settings of the map
+	for (var i = 1; i < map1.length; i++) {
+
+		var x = map1[i].wallX;
+		var y = map1[i].wallY;
+		var width = map1[i].wallWidth;
+		var height = map1[i].wallHeight;
+
+
+		ctx.fillStyle = map1[i].color;
+		ctx.fillRect(x, y, width, height);
+
+		//Collision
+
+		//Top collision
+
+    if(player1.state == "standing"){
+      
+		if (
+			player1.y + Math.abs(player1.offsetY) + player1.height >= y &&
+			player1.x + Math.abs(player1.offsetX) < x + width - player1.speed &&
+			player1.x + Math.abs(player1.offsetX) + player1.width >
+			x + player1.speed &&
+			player1.y + Math.abs(player1.offsetY) + player1.height - player1.velY <=
+			y + height / 2
+		) {
+			player1.velY = 0;
+			player1.offsetY = -(y - player1.y - player1.height);
+			player1.jumped = false;
+
+			//Bottom wall
+		} else if (
+			player1.y + Math.abs(player1.offsetY) <= y + height &&
+			player1.y + Math.abs(player1.offsetY) >= y + height / 2 &&
+			player1.x + Math.abs(player1.offsetX) < x + width - player1.speed &&
+			player1.x + Math.abs(player1.offsetX) + player1.width >
+			x + player1.speed
+		) {
+			player1.velY = gravity;
+			player1.offsetY = -(y - player1.y + height);
+		}
+
+		//Left wall collisio
+		if (
+			player1.x + Math.abs(player1.offsetX) + player1.width >= x &&
+			player1.x + Math.abs(player1.offsetX) + player1.width <=
+			x + width / 2 &&
+			player1.y + Math.abs(player1.offsetY) + player1.height >
+			y + player1.velY &&
+			player1.y + Math.abs(player1.offsetY) < y + height
+		) {
+			player1.velX = 0;
+			player1.offsetX = -(x - player1.x - player1.width);
+			//Right wall collision
+		} else if (
+			player1.x + Math.abs(player1.offsetX) <= x + width &&
+			player1.x + Math.abs(player1.offsetX) >= x + width / 5 &&
+			player1.y + Math.abs(player1.offsetY) + player1.height >
+			y + player1.velY &&
+			player1.y + Math.abs(player1.offsetY) < y + height
+		) {
+			player1.velX = 0;
+			player1.offsetX = -(x + width - player1.x);
+		}
+    } else if(player1.state == "crouching"){
+      if (
+			player1.y + Math.abs(player1.offsetY) + player1.height/2 >= y &&
+			player1.x + Math.abs(player1.offsetX) < x + width - player1.speed &&
+			player1.x + Math.abs(player1.offsetX) + player1.width >
+			x + player1.speed &&
+			player1.y + Math.abs(player1.offsetY) + player1.height/2 - player1.velY <=
+			y + height / 2
+		) {
+			player1.velY = 0;
+			player1.offsetY = -(y - player1.y - player1.height/2);
+			player1.jumped = false;
+
+			//Bottom wall
+		} else if (
+			player1.y + Math.abs(player1.offsetY) <= y + height &&
+			player1.y + Math.abs(player1.offsetY) >= y + height / 2 &&
+			player1.x + Math.abs(player1.offsetX) < x + width - player1.speed &&
+			player1.x + Math.abs(player1.offsetX) + player1.width >
+			x + player1.speed
+		) {
+			player1.velY = gravity;
+			player1.offsetY = -(y - player1.y + height);
+		}
+
+		//Left wall collisio
+		if (
+			player1.x + Math.abs(player1.offsetX) + player1.width >= x &&
+			player1.x + Math.abs(player1.offsetX) + player1.width <=
+			x + width / 2 &&
+			player1.y + Math.abs(player1.offsetY) + player1.height/2 >
+			y + player1.velY &&
+			player1.y + Math.abs(player1.offsetY) < y + height
+		) {
+			player1.velX = 0;
+			player1.offsetX = -(x - player1.x - player1.width);
+			//Right wall collision
+		} else if (
+			player1.x + Math.abs(player1.offsetX) <= x + width &&
+			player1.x + Math.abs(player1.offsetX) >= x + width / 5 &&
+			player1.y + Math.abs(player1.offsetY) + player1.height/2 >
+			y + player1.velY &&
+			player1.y + Math.abs(player1.offsetY) < y + height
+		) {
+			player1.velX = 0;
+			player1.offsetX = -(x + width - player1.x);
+		}
+    }
+
+
+	}
+
+	//Updates all bullets
+	bullets.forEach(function(theBullet) {
+		theBullet.update();
+	});
+	//Draws the player
+	if (player1.state == "standing") {
+		drawStandingPlayer(player1);
+	} else if (player1.state == "crouching") {
+		drawCrouchingPlayer(player1);
+	}
+
+	ctx.restore();
+
+	//Gotta rewrite collision code :(
+	if (
+		player1.y - player1.offsetY + player1.height + player1.velY >=
+		map1[0].height
+	) {
+		player1.velY = 0;
+		player1.jumped = false;
+	}
+
+	if (player1.y - player1.offsetY + player1.height >= map1[0].height) {
+		player1.jumped = false;
+	}
+
+	//Debugging info
+	if (debugging == true) {
+		ctx.fillStyle = "black";
+		ctx.font = "30px Arial";
+		ctx.fillText("offsetX: " + Math.round(player1.offsetX), 10, 30);
+		ctx.fillText("offsetY: " + Math.round(player1.offsetY), 10, 60);
+		ctx.fillText("player1X: " + player1.x, 10, 90);
+		ctx.fillText("player1Y: " + player1.y, 10, 120);
+	}
+
+	//Key detection stuff
+	document.body.addEventListener("keydown", function(e) {
+		keys[e.keyCode] = true;
+	});
+
+	document.body.addEventListener("keyup", function(e) {
+		keys[e.keyCode] = false;
+	});
+
+	//Player 1
+	if (keys[39]) {
+		player1.facing = "right";
+		if (player1.velX < player1.speed) {
+			player1.velX += player1.speed / 4;
+		}
+	}
+
+	if (player1.offsetX < 0) {
+		if (keys[37]) {
+			player1.facing = "left";
+			if (player1.velX > -player1.speed) {
+				player1.velX -= player1.speed / 4;
+			}
+		}
+	} else {
+		player1.offsetX = 0;
+	}
+
+	if (keys[38]) {
+		if (player1.jumped == false) {
+			player1.velY = -player1.jumpPower * 2;
+			player1.jumped = true;
+		}
+	}
+
+	//Crouch
+
+	if (keys[40]) {
+    	if(player1.state == "standing"){
+        	player1.jumpPower = player1.jumpPower/2;
+        	player1.offsetY -= player1.height/2;
+
+			player1.state = "crouching";
+        }
+	} else {
+    	if(player1.state == "crouching"){
+        	player1.jumpPower = player1.jumpPower * 2;
+        	player1.offsetY += player1.height/2;
+			player1.state = "standing";
+        }
+	}
+
+	if (keys[17]) {
+		//Switch weapons
+		if (player1.canSwitchWeapons) {
+			if (player1.class == "soldier") {
+				player1.canSwitchWeapons = false;
+                //Can't shoot while switching weapons, duh
+                player1.canShoot = false;
+				if (player1.gun == "m4") {
+					player1.gun = "machinegun";
+				} else if (player1.gun == "machinegun") {
+					player1.gun = "m4";
 				}
 			}
+            
+            setTimeout(function() {
+				player1.canSwitchWeapons = true;
+                player1.canShoot = true;
+			}, 1000);
+		} 
+	}
 
-			balls[Math.floor(i/2)].velX = -balls[Math.floor(i/2)].velX;
-			//players[i].speed += 0.5;
+	//Pew pew
+
+	if (keys[90]) {
+		if (player1.canShoot == true) {
+			drawGun(player1);
+			player1.canShoot = false;
+			if (player1.gun == "machinegun") {
+				setTimeout(function() {
+					player1.canShoot = true;
+				}, 60);
+			} else if (player1.gun == "pistol") {
+				setTimeout(function() {
+					player1.canShoot = true;
+				}, 350);
+			} else if (player1.gun == "sniper") {
+				setTimeout(function() {
+					player1.canShoot = true;
+				}, 1750);
+			} else if (player1.gun == "m4") {
+				setTimeout(function() {
+					player1.canShoot = true;
+				}, 100);
+			}
 		}
+	}
 
+	player1.offsetX -= player1.velX;
+	player1.velX *= friction;
+
+	//Terminal velocity
+	if (player1.velY <= 36) {
+		player1.offsetY -= player1.velY;
+		player1.velY += gravity;
+	}
+
+	requestAnimationFrame(frame);
 }
 
-        
-//Ball movement
-		if (balls[Math.floor(i/2)].direction == 1) {
-			balls[Math.floor(i/2)].x += balls[Math.floor(i/2)].velX * Math.cos(balls[Math.floor(i/2)].angle * Math.PI / 180);
-			balls[Math.floor(i/2)].y += balls[Math.floor(i/2)].velY * Math.sin(balls[Math.floor(i/2)].angle * Math.PI / 180);
-		} else if (balls[Math.floor(i/2)].direction == 0) {
-			balls[Math.floor(i/2)].x -= balls[Math.floor(i/2)].velX * Math.cos(balls[Math.floor(i/2)].angle * Math.PI / 180);
-			balls[Math.floor(i/2)].y -= balls[Math.floor(i/2)].velY * Math.sin(balls[Math.floor(i/2)].angle * Math.PI / 180);
-		}
-        
-        
-        if( balls[Math.floor(i/2)].x < 0){
-        	if(i % 2 == 0){
-        		players.splice(i, 1);
-            } else {
-        		players.splice(i - 1, 1);
-            }
-        } else if( balls[Math.floor(i/2)].x + balls[Math.floor(i/2)].width > ctx.canvas.width){
-        	if(i % 2 == 0){
-        		players.splice(i + 1, 1);
-            } else {
-        		players.splice(i, 1);
-            }
-        }
-        
-        
+//If everything has loaded, then start the game
+//It's commented out since for the pre-alpha version of the game I'm just using rectangles and circles lol.
+//if(imagesLoaded == maxImages)
 
-        
-    }
-    
-        for(var i = 0; i < balls.length; i++){
-    	ctx.fillStyle = "white";
-        ctx.fillRect(balls[i].x, balls[i].y, balls[i].width, balls[i].height);
+//When everything loads, start the animation loop
+window.onload = frame();
 
-
-        
-
-    }
-    
-    
-    requestAnimationFrame(frame);
-}
-
-frame();
 </script>
