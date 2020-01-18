@@ -59,8 +59,8 @@ function Ball() {
 	this.direction = Math.random() > 0.5 ? 0 : 1;
 	this.speed = 4;
 	this.angle = 0;
-	this.velX = 0;
-	this.velY = 0;
+	this.velX = this.speed;
+	this.velY = this.speed;
 
 }
 
@@ -148,7 +148,7 @@ function init(numberOfNeuralNetworks, weights1Length, biases1Length, weights2Len
 }
 
 
-init(20, 120, 10, 30, 3);
+init(2, 120, 10, 30, 3);
 
 function calcOutput(i){
 	if (i % 2 == 0){
@@ -218,7 +218,25 @@ var hn1 = squish( players[i].x * neuralNetworks[i].weights1[0] + players[i].y * 
 	return outputs;
 
 }
-alert(calcOutput(19))
+
+function indexOfMax(arr) {
+    if (arr.length === 0) {
+        return -1;
+    }
+
+    var max = arr[0];
+    var maxIndex = 0;
+
+    for (var i = 1; i < arr.length; i++) {
+        if (arr[i] > max) {
+            maxIndex = i;
+            max = arr[i];
+        }
+    }
+
+    return maxIndex;
+}
+
 function frame(){
 	ctx.fillStyle = "black";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -226,11 +244,66 @@ function frame(){
     for(var i = 0; i < players.length; i++){
     	ctx.fillStyle = "white";
         ctx.fillRect(players[i].x, players[i].y, players[i].width, players[i].height);
+        
+        var outputs = calcOutput(i);
+        
+        //Moves the players
+        if(indexOfMax(outputs) == 0){
+        	players[i].y -= players[i].speed;
+        } else if(indexOfMax(outputs) == 1){
+        	players[i].y += players[i].speed;
+        }
+        
+        
+        
+//Ball collision against top and bottom wall
+		if (balls[Math.floor(i/2)].y <= 0 || balls[Math.floor(i/2)].y + balls[Math.floor(i/2)].height >= ctx.canvas.height) {
+			balls[Math.floor(i/2)].velY = -balls[Math.floor(i/2)].velY;
+		}
+        
+        
+//Against player paddles
+		if (balls[Math.floor(i/2)].x <= players[i].x + players[i].width && balls[Math.floor(i/2)].y + balls[Math.floor(i/2)].height >= players[i].y && balls[Math.floor(i/2)].y <= players[i].y + players[i].height) {
+			balls[Math.floor(i/2)].angle = players[i].y + players[i].height / 2 - balls[Math.floor(i/2)].y
+
+			if (balls[Math.floor(i/2)].velX > 0) {
+				if (balls[Math.floor(i/2)].velX < 20) {
+					//balls[Math.floor(i/2)].velX++;
+				}
+			} else {
+				if (balls[Math.floor(i/2)].velX > -20) {
+					//balls[Math.floor(i/2)].velX--;
+				}
+			}
+
+			balls[Math.floor(i/2)].velX = -balls[Math.floor(i/2)].velX;
+			//players[i].speed += 0.5;
+		}
+
+
+        
+//Ball movement
+		if (balls[Math.floor(i/2)].direction == 1) {
+			balls[Math.floor(i/2)].x += balls[Math.floor(i/2)].velX * Math.cos(balls[Math.floor(i/2)].angle * Math.PI / 180);
+			balls[Math.floor(i/2)].y += balls[Math.floor(i/2)].velY * Math.sin(balls[Math.floor(i/2)].angle * Math.PI / 180);
+		} else if (balls[Math.floor(i/2)].direction == 0) {
+			balls[Math.floor(i/2)].x -= balls[Math.floor(i/2)].velX * Math.cos(balls[Math.floor(i/2)].angle * Math.PI / 180);
+			balls[Math.floor(i/2)].y -= balls[Math.floor(i/2)].velY * Math.sin(balls[Math.floor(i/2)].angle * Math.PI / 180);
+		}
+        
+        
+        
+
+        
     }
     
         for(var i = 0; i < balls.length; i++){
     	ctx.fillStyle = "white";
         ctx.fillRect(balls[i].x, balls[i].y, balls[i].width, balls[i].height);
+
+
+        
+
     }
     
     
