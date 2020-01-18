@@ -249,9 +249,13 @@ function frame(){
         
         //Moves the players
         if(indexOfMax(outputs) == 0){
-        	players[i].y -= players[i].speed;
+        	if(players[i].y >= 0){
+        		players[i].y -= players[i].speed;
+            }
         } else if(indexOfMax(outputs) == 1){
-        	players[i].y += players[i].speed;
+        	if(players[i].y + players[i].height <= ctx.canvas.height){
+        		players[i].y += players[i].speed;
+            }
         }
         
         
@@ -312,6 +316,20 @@ function frame(){
 			balls[Math.floor(i/2)].y -= balls[Math.floor(i/2)].velY * Math.sin(balls[Math.floor(i/2)].angle * Math.PI / 180);
 		}
         
+        
+        if( balls[Math.floor(i/2)].x < 0){
+        	if(i % 2 == 0){
+        		players.splice(i, 1);
+            } else {
+        		players.splice(i - 1, 1);
+            }
+        } else if( balls[Math.floor(i/2)].x + balls[Math.floor(i/2)].width > ctx.canvas.width){
+        	if(i % 2 == 0){
+        		players.splice(i + 1, 1);
+            } else {
+        		players.splice(i, 1);
+            }
+        }
         
         
 
