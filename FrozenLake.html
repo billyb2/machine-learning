@@ -1,0 +1,58 @@
+<p id="Q"></p>
+<canvas id="canvas"></canvas>
+<button onclick="frame()">Frame!</button>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext('2d');
+ctx.canvas.height = 400
+//The importance of memory
+var gamma = 0.8;
+var R = [
+	[-001, -001, -001, -001],
+	[-001, -100, -001, -100],
+	[-001, -001, -001, -100],
+	[-100, -001, -001, 100]
+];
+
+var Q = [
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0]
+
+];
+
+
+
+function getRandomInt(min, max) {
+	// Create byte array and fill with 1 random number
+	var byteArray = new Uint8Array(1);
+	window.crypto.getRandomValues(byteArray);
+
+	var range = max - min + 1;
+	var max_range = 256;
+	if (byteArray[0] >= Math.floor(max_range / range) * range)
+		return getRandomInt(min, max);
+	return min + (byteArray[0] % range);
+}
+
+
+var state = Math.floor(Math.random() * 13)
+var action = Math.floor(Math.random() * 5);
+
+function frame() {
+
+    
+    
+}
+
+frame();
+</script>
