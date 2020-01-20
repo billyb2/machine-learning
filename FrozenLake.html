@@ -71,13 +71,14 @@ function getRandomInt(min, max) {
 }
 
 
-var state = Math.floor(Math.random() * 13)
-var action = Math.floor(Math.random() * 5);
+var state = getRandomInt(0, 15)
+var action = getRandomInt(0, 4);
 
 function frame() {
-
-    
-    
+	//If the state is on an ending state, then roll for a new state
+	while(state == 15 || state == 12 || state == 11 || state == 5 || state == 7){
+    	state = getRandomInt(0, 15);
+    }
 }
 
 frame();
