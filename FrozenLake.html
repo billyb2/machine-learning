@@ -5,6 +5,7 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 ctx.canvas.height = 400
+
 //The importance of memory
 var gamma = 0.8;
 //What the map looks like as a 2d array
@@ -52,6 +53,10 @@ var Q = [
 	[0, 0, 0, 0],
 	[0, 0, 0, 0],
 	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
+	[0, 0, 0, 0],
 	[0, 0, 0, 0]
 
 ];
@@ -72,13 +77,85 @@ function getRandomInt(min, max) {
 
 
 var state = getRandomInt(0, 15)
-var action = getRandomInt(0, 4);
+var action = getRandomInt(0, 3);
 
 function frame() {
 	//If the state is on an ending state, then roll for a new state
 	while(state == 15 || state == 12 || state == 11 || state == 5 || state == 7){
     	state = getRandomInt(0, 15);
     }
+    
+    //If the action is impossible, roll for a new one
+    while(R[state][action] == -999){
+		action = getRandomInt(0, 3);
+    }
+    
+    var possibleActions = [];
+    //The Q of every action
+	var possibleActionsQ = [];
+    
+    
+    
+    for(var i = 0; i < 4; i++){
+      if(action == 0){
+        if (R[state - 4][i] !== -999){
+            possibleActions.push(i);
+            possibleActionsQ.push(Q[action][i]);
+        }
+      
+      } else if(action == 1){
+        if (R[state + 4][i] !== -999){
+            possibleActions.push(i);
+            possibleActionsQ.push(Q[action][i]);
+        }
+} else if(action == 2){
+        if (R[state - 1][i] !== -999){
+            possibleActions.push(i);
+            possibleActionsQ.push(Q[action][i]);
+        }
+} else if(action == 3){
+
+        if (R[state + 1][i] !== -999){
+            possibleActions.push(i);
+            possibleActionsQ.push(Q[action][i]);
+        }
+}
+
+
+      if(i == 3){
+      document.getElementById("Q").innerHTML += "<p> State:" + state + "</p>" + "<p> Action:" + action + "<p>"+R[state][action]+"</p>"
+      }
+    }
+    
+    for(var i = 0; i < Q.length; i++){
+          if(i == 0){
+        document.getElementById("Q").innerHTML = "";
+      }
+      document.getElementById("Q").innerHTML += "<p> " + i + " [" + Q[i] + "]</p>" ;
+      
+    }
+
+    
+	Q[state][action] = R[state][action] + gamma * Math.max.apply(null, possibleActionsQ);
+    
+    
+    
+   	if(action == 0){
+    	state -= 4;
+    } else if(action == 1){
+    	state += 4;
+    } else if(action == 2){
+    	state --;
+    } else if(action == 3){
+    	state ++;
+    }
+    
+    ctx.fillStyle = 'black';
+
+    
+
+requestAnimationFrame(frame);
+    
 }
 
 frame();
