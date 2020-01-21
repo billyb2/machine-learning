@@ -9,7 +9,7 @@ ctx.canvas.height = 400
 //The importance of memory
 var gamma = 0.8;
 //What the map looks like as a 2d array
-var R = [
+var M = [
 	[-001, -001, -001, -001],
 	[-001, -100, -001, -100],
 	[-001, -001, -001, -100],
@@ -79,7 +79,12 @@ function getRandomInt(min, max) {
 var state = getRandomInt(0, 15)
 var action = getRandomInt(0, 3);
 
+
+
 function frame() {
+
+    
+
 	//If the state is on an ending state, then roll for a new state
 	while(state == 15 || state == 12 || state == 11 || state == 5 || state == 7){
     	state = getRandomInt(0, 15);
@@ -139,6 +144,56 @@ function frame() {
 	Q[state][action] = R[state][action] + gamma * Math.max.apply(null, possibleActionsQ);
     
     
+    //Draws the map
+
+for(var y = 0; y < M.length; y++){
+	for(var x = 0; x  < M[y].length; x++){
+    
+    	if(M[y][x] == -1){
+        	ctx.fillStyle = "blue";
+        } else if(M[y][x] == -100){
+        	ctx.fillStyle = "red";
+        } else if(M[y][x] == 100){
+        	ctx.fillStyle = "green";
+        }
+    	ctx.fillRect(x * 25, y * 25, 25, 25);
+    }
+}
+    
+    
+    ctx.fillStyle = 'black';
+    if(state == 0){
+    	ctx.fillRect(0, 0, 25, 25);
+    } else if(state == 1){
+    	ctx.fillRect(25, 0, 25, 25);
+    } else if(state == 2){
+    	ctx.fillRect(50, 0, 25, 25);
+    } else if(state == 3){
+    	ctx.fillRect(75, 0, 25, 25);
+    } else if(state == 4){
+    	ctx.fillRect(0, 25, 25, 25);
+    } else if(state == 5){
+    	ctx.fillRect(25, 25, 25, 25);
+    } else if(state == 6){
+    	ctx.fillRect(50, 25, 25, 25);
+    } else if(state == 7){
+    	ctx.fillRect(75, 25, 25, 25);
+    } else if(state == 8){
+    	ctx.fillRect(25, 50, 25, 25);
+    } else if(state == 9){
+    	ctx.fillRect(50, 50, 25, 25);
+    } else if(state == 10){
+    	ctx.fillRect(75, 50, 25, 25);
+    } else if(state == 11){
+    	ctx.fillRect(0, 75, 25, 25);
+    } else if(state == 12){
+    	ctx.fillRect(25, 75, 25, 25);
+    } else if(state == 13){
+    	ctx.fillRect(50, 75, 25, 25);
+    } else if(state == 14){
+    	ctx.fillRect(75, 75, 25, 25);
+    }
+    
     
    	if(action == 0){
     	state -= 4;
@@ -150,11 +205,10 @@ function frame() {
     	state ++;
     }
     
-    ctx.fillStyle = 'black';
 
-    
 
-requestAnimationFrame(frame);
+
+//requestAnimationFrame(frame);
     
 }
 
