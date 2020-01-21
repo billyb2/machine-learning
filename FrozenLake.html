@@ -6,6 +6,8 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 ctx.canvas.height = 400
 
+var episodes = 0;
+
 //The importance of memory
 var gamma = 0.8;
 //What the map looks like as a 2d array
@@ -82,13 +84,22 @@ var action = getRandomInt(0, 3);
 
 
 function frame() {
-
+	
     
 
 	//If the state is on an ending state, then roll for a new state
+    var counted = false;
 	while(state == 15 || state == 12 || state == 11 || state == 5 || state == 7){
-    	state = getRandomInt(0, 15);
+    if(!counted){
+    	counted = true;
+        episodes++;
+    }	if(episodes < 100){
+    		state = getRandomInt(0, 15);
+        } else {
+        	state = 0;
+        }
     }
+    
     
     //If the action is impossible, roll for a new one
     while(R[state][action] == -999){
@@ -138,6 +149,12 @@ function frame() {
       }
       document.getElementById("Q").innerHTML += "<p> " + i + " [" + Q[i] + "]</p>" ;
       
+      if(i == 15){
+      	document.getElementById("Q").innerHTML += "<p> Episodes:" + episodes + "</p>"
+      }
+      
+      
+      
     }
 
     
@@ -150,7 +167,7 @@ for(var y = 0; y < M.length; y++){
 	for(var x = 0; x  < M[y].length; x++){
     
     	if(M[y][x] == -1){
-        	ctx.fillStyle = "blue";
+        	ctx.fillStyle = "lightblue";
         } else if(M[y][x] == -100){
         	ctx.fillStyle = "red";
         } else if(M[y][x] == 100){
@@ -179,20 +196,22 @@ for(var y = 0; y < M.length; y++){
     } else if(state == 7){
     	ctx.fillRect(75, 25, 25, 25);
     } else if(state == 8){
-    	ctx.fillRect(25, 50, 25, 25);
+    	ctx.fillRect(0, 50, 25, 25);
     } else if(state == 9){
-    	ctx.fillRect(50, 50, 25, 25);
+    	ctx.fillRect(25, 50, 25, 25);
     } else if(state == 10){
+    	ctx.fillRect(50, 50, 25, 25);
+    }  else if(state == 11){
     	ctx.fillRect(75, 50, 25, 25);
-    } else if(state == 11){
+    }  else if(state == 12){
     	ctx.fillRect(0, 75, 25, 25);
-    } else if(state == 12){
+    }  else if(state == 13){
     	ctx.fillRect(25, 75, 25, 25);
-    } else if(state == 13){
+    }   else if(state == 14){
     	ctx.fillRect(50, 75, 25, 25);
-    } else if(state == 14){
+    }   else if(state == 15){
     	ctx.fillRect(75, 75, 25, 25);
-    }
+    }  
     
     
    	if(action == 0){
